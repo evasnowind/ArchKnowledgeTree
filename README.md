@@ -8,7 +8,7 @@
 ### 1. Java基础
 
 #### IO
-- 1. 根据URL获取输入流
+- 1. [Java根据URL网址获取输入流](java/Java根据URL网址获取输入流.md)
 
 #### java 8新特性
 
