@@ -9,6 +9,11 @@
 
 #### IO
 - 1. [Java根据URL网址获取输入流](java/Java根据URL网址获取输入流.md)
+- 2. [Java中如何判断文件类型]
+  - 根据文件后缀
+  - 根据文件魔数
+    - UrlConnection都有实现
+    - 第三方库https://blog.csdn.net/wangpeng047/article/details/38302395/
 
 #### java 8新特性
 
@@ -38,6 +43,13 @@
 
 #### dubbo
 
+#### kubernetes
+
+
+#### quartz
+
+##### 动态调度
+
 
 ### 4. linux
 
@@ -47,6 +59,13 @@
 
 #### MySQL
 
+
+### 计算机网络
+
+#### HTTP  
+
+##### HTTP Header
+- [HTTP中Content-Disposition与Content-Type的作用](network/HTTP中Content-Disposition与Content-Type的作用.md)
 
 
 
