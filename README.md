@@ -9,11 +9,9 @@
 
 #### IO
 - 1. [Java根据URL网址获取输入流](java/Java根据URL网址获取输入流.md)
-- 2. [Java中如何判断文件类型]
-  - 根据文件后缀
-  - 根据文件魔数
-    - UrlConnection都有实现
-    - 第三方库https://blog.csdn.net/wangpeng047/article/details/38302395/
+- 2. [Java中如何判断文件类型](java/Java中如何判断文件类型.md)
+ 
+
 
 #### java 8新特性
 
@@ -83,6 +81,12 @@
 #### 5.2 数据库中间件
 
 ##### MyCAT
+
+
+
+#### 缓存
+
+##### Redis
 
 
 
