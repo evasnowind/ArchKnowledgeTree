@@ -10,7 +10,6 @@
 #### IO
 - 1. [Java根据URL网址获取输入流](java/Java根据URL网址获取输入流.md)
 - 2. [Java中如何判断文件类型](java/Java中如何判断文件类型.md)
- 
 
 
 #### java 8新特性
@@ -66,6 +65,11 @@
 - [HTTP中Content-Disposition与Content-Type的作用](network/HTTP中Content-Disposition与Content-Type的作用.md)
 
 
+### ORM框架
+
+#### MyBatis
+- [mybatis xml常用写法-传入数组list](frameworks/mybatis_and_mybatis_plus/mybatis_xml常用写法-传入数组list.md)
+- [mybatis_xml常用写法-使用like关键字](frameworks/mybatis_and_mybatis_plus/mybatis_xml常用写法-使用like关键字.md)
 
 
 
