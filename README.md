@@ -49,6 +49,7 @@
 
 
 ### 4. linux
+- [在shell中split字符串并遍历](linux/在shell中split字符串并遍历.md)
 
 ### 5. 数据库
 
