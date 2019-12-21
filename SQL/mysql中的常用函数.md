@@ -2,14 +2,34 @@
 
 [TOC]
 
+## 
+
 ## 字符串操作
+
+### 字符串字符个数 CHAR_LENGTH
+```
+CHAR_LENGTH(str)
+```
+
+### 插入字符串 INSERT(s1,x,len,s2)
+返回字符串s1，其子字符串起始于位置x，被字符串s2取代len个字符
+
 
 ### 字符串拼接 concat
 ```
 select id, name, concat('-', name, '-') from t_student;
 ```
 
-### 去掉无用空格 trim
+### 大小写转换函数 LOWER(str)和LCASE(str)、UPPER(str)和UCASE(str)
+前两者将str中的字母全部转换成小写，后两者将字符串中的字母全部转换成大写
+
+### 字符串拼接 CONCAT_WS(x,s1,s2,...)
+返回多个字符串拼接之后的字符串，每个字符串之间有一个x
+
+### 去掉行首/行未空格 LTRIM(s)、RTRIM(s)
+前者返回字符串s，其左边所有空格被删除；后者返回字符串s，其右边所有空格被删除
+
+### 去掉行首、行尾空格 trim
 ```
 select id, name, trim(name) from t_student
 ```
