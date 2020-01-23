@@ -50,4 +50,37 @@ mysql> select SQL_CACHE * from T where ID=10；
 在数据库的慢查询日志中看到一个 rows_examined 的字段，表示这个语句执行过程中扫描了多少行。这个值就是在执行器每次调用引擎获取数据行的时候累加的。在有些场景下，执行器调用一次，在引擎内部则扫描了多行，因此引擎扫描行数跟 rows_examined 并不是完全相同的。
 
 
+## 02 | 日志系统：一条SQL更新语句是如何执行的？
+在一个表上有更新的时候，跟这个表有关的查询缓存会失效，所以这条语句就会把表 T 上所有缓存结果都清空。
 
+### redo log 重做日志
+**WAL 技术**：Write-Ahead Logging，先写日志，再写磁盘
+InnoDB 引擎就会先把记录写到 redo log，更新内存，然后在适当的时候（系统较为空闲时）更新磁盘记录。
+InnoDB 的 redo log 是固定大小的，结构如下图：
+![02-redo-log.png](images/02-redo-log.png)
+redo log保证了InnoDB存储引擎在发生异常、重启时，之前提交的记录不会丢失——crash-safe能力
+
+### binlog 归档日志
+MySQL的结构:
+- server层
+  - binlog，只用于归档
+- 存储引擎层
+  - MySQL 自带的引擎是 MyISAM没有redo log，InnoDB是以插件形式集成进来，InnoDB自己为保证crash-safe才实现了redo log
+
+binlog与redo log区别：
+- redo log是InnoDB特有，binlog在MySQL server层，所有引擎可用
+- redo log是物理日志，binlog是逻辑日志
+- redo log循环写入，binlog追加写入
+
+Redo log不是记录数据页“更新之后的状态”，而是记录这个页 “做了什么改动”。
+Binlog有两种模式，statement 格式的话是记sql语句， row格式会记录行的内容，记两条，更新前和更新后都有。
+
+### binlog不能去掉
+- redo log只有InnoDB有，别的引擎没有。
+- redolog是循环写的，不持久保存，binlog的“归档”这个功能，redolog是不具备的。
+
+其核心就是， redo log 记录的，即使异常重启，都会刷新到磁盘，而 bin log 记录的， 则主要用于备份。
+
+
+### 为什么日志需要“两阶段提交”
+redo log 和 binlog 都可以用于表示事务的提交状态，而两阶段提交就是让这两个状态保持逻辑上的一致。
