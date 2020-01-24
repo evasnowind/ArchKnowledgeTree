@@ -81,6 +81,57 @@ Binlog有两种模式，statement 格式的话是记sql语句， row格式会记
 
 其核心就是， redo log 记录的，即使异常重启，都会刷新到磁盘，而 bin log 记录的， 则主要用于备份。
 
-
 ### 为什么日志需要“两阶段提交”
 redo log 和 binlog 都可以用于表示事务的提交状态，而两阶段提交就是让这两个状态保持逻辑上的一致。
+
+## 03 | 事务隔离：为什么你改了我还看不见？
+
+### 隔离性与隔离级别
+ACID（Atomicity、Consistency、Isolation、Durability，即原子性、一致性、隔离性、持久性）
+
+多个事务同时执行，可能出现：
+脏读（dirty read）、不可重复读（non-repeatable read）、幻读（phantom read）的问题
+——隔离级别
+
+SQL 标准的事务隔离级别包括：
+- 读未提交（read uncommitted）
+- 读提交（read committed）
+- 可重复读（repeatable read）
+  - 事务在执行期间看到的数据前后必须是一致的
+- 串行化（serializable ）
+隔离级别越高，效率越低，需要权衡。
+
+Oracle 数据库的默认隔离级别是“读提交”
+MySQL默认隔离级别是“可重复读”
+——从Oracle迁移到MySQL，为保证数据库隔离级别的一致，你一定要记得将 MySQL 的隔离级别设置为“读提交”，即将启动参数 transaction-isolation 的值设置成 READ-COMMITTED
+查看方式：
+```
+show variables like 'transaction_isolation';
+```
+### 事务隔离的实现
+
+为何建议尽量不使用长事务？
+- 对回滚段的影响
+- 占用锁资源
+- 可能拖垮整个库
+
+参考文章：[MySQL-长事务详解](https://www.cnblogs.com/kunjian/p/11552646.html)
+
+
+### 事务的启动方式
+MySQL 的事务启动方式有以下几种：
+1. 显式启动：begin 或 start transaction。配套的提交语句是 commit，回滚语句是 rollback。
+2. set autocommit=0，这个命令会将这个线程的自动提交关掉。意味着如果你只执行一个 select 语句，这个事务就启动了，而且并不会自动提交。这个事务持续存在直到你主动执行 commit 或 rollback 语句，或者断开连接。
+
+建议总是使用 set autocommit=1, 通过显式语句的方式来启动事务。
+
+若纠结“多一次交互”的问题，希望减少交互次数，则建议使用**commit work and chain 语法**
+
+可以在 information_schema 库的 innodb_trx 这个表中查询长事务
+如下面这个语句，用于查找持续时间超过 60s 的事务：
+```
+select * from information_schema.innodb_trx where TIME_TO_SEC(timediff(now(),trx_started))>60
+```
+
+### 参考资料
+- [MySQL-长事务详解](https://www.cnblogs.com/kunjian/p/11552646.html)
