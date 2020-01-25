@@ -135,3 +135,14 @@ select * from information_schema.innodb_trx where TIME_TO_SEC(timediff(now(),trx
 
 ### 参考资料
 - [MySQL-长事务详解](https://www.cnblogs.com/kunjian/p/11552646.html)
+
+
+## 04 | 深入浅出索引（上）
+### 索引的常见模型：
+- 哈希表：适用于只有等值查询的场景，比如 Memcached 及其他一些 NoSQL 引擎。
+- 有序数组：在等值查询和范围查询场景中的性能就都非常优秀，只适用于静态存储引擎
+- N 叉树
+- 其他：跳表、LSM 树等
+
+### InnoDB 的索引模型
+B+ 树
