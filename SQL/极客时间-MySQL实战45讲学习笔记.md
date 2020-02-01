@@ -330,3 +330,55 @@ analyze table 表名
   - 改写方法1：把“order by b limit 1” 改成 “order by b,a limit 1”
   - 改写方法2：`select * from  (select * from t where (a between 1 and 1000)  and (b between 50000 and 100000) order by b limit 100)alias limit 1;`
 - 方法3：在有些场景下，我们可以新建一个更合适的索引，来提供给优化器做选择，或删掉误用的索引。
+
+
+## 11 | 怎么给字符串字段加索引？
+问题：如何在邮箱这样的字段上加索引？
+
+### 思路1：给邮箱整个字段加索引
+### 思路2：使用邮箱前缀加索引
+
+区别：
+- 存储上，思路1占用空间大，但可以减少扫描次数；思路2，前缀占用空间少，可能重复，因而可能会导致更多的扫描次数
+- 如果查询的是只是"物理id,邮箱地址"，那么思路1不用回表；思路2还是需要回表查询。
+  - 此即前缀索引对覆盖索引的影响
+
+**使用前缀索引，定义好长度，就可以做到既节省空间，又不用额外增加太多的查询成本。**
+问题：如何确定前缀索引使用多长的前缀？
+根据字段区分度，统计索引上有多少个不同的值来判断。
+
+```
+mysql> select 
+  count(distinct left(email,4)）as L4,
+  count(distinct left(email,5)）as L5,
+  count(distinct left(email,6)）as L6,
+  count(distinct left(email,7)）as L7,
+from SUser;
+```
+
+当然，使用前缀索引很可能会损失区分度，所以你需要预先设定一个可以接受的损失比例，比如 5%。然后，在返回的 L4~L7 中，找出不小于 L * 95% 的值，假设这里 L6、L7 都满足，你就可以选择前缀长度为 6。
+
+
+其他方式:
+比如类似身份证号的字段，前缀有大量重复，可能是中间、或是后缀有区分度的情况
+
+### 思路3：使用倒序存储
+存储身份证号的时候把它倒过来存，查询时，这么查询：
+```
+mysql> select field_list from t where id_card = reverse('input_id_card_string');
+```
+注意，也要用count(distinct)的方式验证倒序后，采用前缀索引的区分度。
+
+### 思路4：使用hash字段
+可以在表上再创建一个整数字段，来保存身份证的校验码，同时在这个字段上创建索引。
+```
+mysql> alter table t add id_card_crc int unsigned, add index(id_card_crc);
+```
+
+每次插入新记录的时候，都同时用 crc32() 这个函数得到校验码填到这个新字段。
+由于校验码可能存在冲突，查询语句 where 部分要判断 id_card 的值是否精确相同。即：
+```
+mysql> select field_list from t where id_card_crc=crc32('input_id_card_string') and id_card='input_id_card_string'
+```
+
+思路3、4都不支持范围索引，只支持等值查询；查询效率上，思路4使用hash的查询性能更稳定，因为hash冲突概率很小
