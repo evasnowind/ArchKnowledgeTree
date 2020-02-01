@@ -8,8 +8,11 @@
 ### 1. Java基础
 
 #### IO
-- 1. [Java根据URL网址获取输入流](java/Java根据URL网址获取输入流.md)
-- 2. [Java中如何判断文件类型](java/Java中如何判断文件类型.md)
+- [Java常用命令行工具汇总](java/Java常用命令行工具汇总.md)
+- [Java根据URL网址获取输入流](java/Java根据URL网址获取输入流.md)
+- [Java中如何判断文件类型](java/Java中如何判断文件类型.md)
+- [Java中日期格式化yyyyMMdd和YYYYMMdd的区别](java/Java中日期格式化yyyyMMdd和YYYYMMdd的区别.md)
+- [spring boot启动失败，JVM 报错：warning Insufficient space for shared memory file](java/warning_Insufficient_space_for_shared_memory_file.md)
 
 
 #### java 8新特性
@@ -50,17 +53,22 @@
 
 ### 4. linux
 - [在shell中split字符串并遍历](linux/在shell中split字符串并遍历.md)
+- [linux_shell脚本执行方式](linux/linux_shell脚本执行方式.md)
+- [linux常用命令整理](linux/linux常用命令整理.md)
 
 ### 5. 数据库
 
 #### SQL
 
 #### MySQL
+- [mysql常用命令与技巧汇总](SQL/mysql常用命令与技巧汇总.md)
+- [mysql中的常用函数](SQL/mysql中的常用函数.md)
+- [极客时间-MySQL实战45讲学习笔记](SQL/极客时间-MySQL实战45讲学习笔记)
 
 
 ### 计算机网络
 
-#### HTTP  
+#### HTTP
 
 ##### HTTP Header
 - [HTTP中Content-Disposition与Content-Type的作用](network/HTTP中Content-Disposition与Content-Type的作用.md)
@@ -69,7 +77,9 @@
 ### ORM框架
 
 #### MyBatis
-- [mybatis xml常用写法-传入数组list](frameworks/mybatis_and_mybatis_plus/mybatis_xml常用写法-传入数组list.md)
+- [mybatis_plus常见用法-不用xml实现自定义查询](frameworks/mybatis_and_mybatis_plus/mybatis_plus常见用法-不用xml实现自定义查询.md)
+- [mybatis_plus常见用法-仅查询部分字段](frameworks/mybatis_and_mybatis_plus/mybatis_plus常见用法-仅查询部分字段.md)
+- [mybatis_xml常用写法-传入数组list](frameworks/mybatis_and_mybatis_plus/mybatis_xml常用写法-传入数组list.md)
 - [mybatis_xml常用写法-使用like关键字](frameworks/mybatis_and_mybatis_plus/mybatis_xml常用写法-使用like关键字.md)
 
 
@@ -96,6 +106,8 @@
 #### Redis
 
 
+### 架构
+- [左耳听风专栏学习笔记](architecture/左耳听风专栏学习笔记.md)
 
 ### 算法
 - [JAVA生成总和及个数确定的一组随机数](algorithm/JAVA生成总和及个数确定的一组随机数.md)
