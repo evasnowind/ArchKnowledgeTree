@@ -1,5 +1,7 @@
 # 极客时间-MySQL实战45讲学习笔记
 
+[TOC]
+
 ## 01 | 基础架构：一条SQL查询语句是如何执行的？
 
 SQL执行示例
@@ -382,3 +384,61 @@ mysql> select field_list from t where id_card_crc=crc32('input_id_card_string') 
 ```
 
 思路3、4都不支持范围索引，只支持等值查询；查询效率上，思路4使用hash的查询性能更稳定，因为hash冲突概率很小
+
+
+## 12 | 为什么我的MySQL会“抖”一下？
+当内存数据页跟磁盘数据页内容不一致的时候，我们称这个内存页为“脏页”。
+
+**WAL技术**
+Write-Ahead Logging，它的关键点就是先写日志，再写磁盘。InnoDB 引擎就会先把记录写到 redo log里面，并更新内存，这个时候更新就算完成了。
+平时执行很快的更新操作，其实就是在写内存和日志，而 MySQL 偶尔“抖”一下的那个瞬间，可能就是在刷脏页（flush）。
+
+### 什么情况会引发数据库的 flush 过程呢？
+- 情况1：InnoDB 的 redo log 写满了。这时候系统会停止所有更新操作，把 checkpoint 往前推进，redo log 留出空间可以继续写。
+- 情况2：系统内存不足。当需要新的内存页，而内存不够用的时候，就要淘汰一些数据页，空出内存给别的数据页使用。如果淘汰的是“脏页”，就要先将脏页写到磁盘。
+- 情况3：MySQL 认为系统“空闲”的时候。
+- 情况4：MySQL 正常关闭的情况。
+
+情况3是空闲时候，不会影响业务，不用管；
+情况4即将关闭肯定没有什么业务请求，不用管；
+情况1会堵塞更新，需要尽量避免；
+情况2是常态，InnoDB 用缓冲池（buffer pool）管理内存，缓冲池中的内存页有三种状态：
+- 还没有使用
+- 已使用，是干净页
+- 已使用，是脏页
+InnoDB 的策略是尽量使用内存，因此对于一个长时间运行的库来说，未被使用的页面很少。
+出现以下这两种情况，都是会明显影响性能的：
+1. 一个查询要淘汰的脏页个数太多，会导致查询的响应时间明显变长；
+2. 日志写满，更新全部堵住，写性能跌为 0，这种情况对敏感业务来说，是不能接受的。
+
+所以，InnoDB 需要有控制脏页比例的机制，来尽量避免上面的这两种情况。
+
+### InnoDB 刷脏页的控制策略
+1. 首先需要告知InnoDB所在主机的IO能力
+   配置innodb_io_capacity参数，建议设置为磁盘的IOPS。磁盘的IOPS可以用fio来测试。比如作者用以下语句测试随机读写性能：
+   ```  
+    fio -filename=$filename -direct=1 -iodepth 1 -thread -rw=randrw -ioengine=psync -bs=16k -size=500M -numjobs=10 -runtime=10 -group_reporting -name=mytest 
+   ```
+   innodb_io_capacity 参数配置错误，可能导致上不去。
+2. 控制InnoDB刷脏页速度
+   如果刷太慢，将导致：内存脏页太多，redo log写满
+   要避免该情况，因而刷盘速度需要考虑：一个是脏页比例，一个是 redo log 写盘速度。
+   参数 innodb_max_dirty_pages_pct 是脏页比例上限，默认值是 75%。
+   ![InnoDB刷脏页速度策略](images/InnoDB刷脏页速度策略.png)
+
+   无论是你的查询语句在需要内存的时候可能要求淘汰一个脏页，还是由于刷脏页的逻辑会占用 IO 资源并可能影响到了你的更新语句，都可能是造成你从业务端感知到 MySQL“抖”了一下的原因。
+
+要尽量避免这种情况，你就要合理地设置 innodb_io_capacity 的值，并且平时要多关注脏页比例，不要让它经常接近 75%。
+其中，脏页比例是通过 Innodb_buffer_pool_pages_dirty/Innodb_buffer_pool_pages_total 得到的，具体的命令参考下面的代码：
+```
+
+mysql> select VARIABLE_VALUE into @a from global_status where VARIABLE_NAME = 'Innodb_buffer_pool_pages_dirty';
+select VARIABLE_VALUE into @b from global_status where VARIABLE_NAME = 'Innodb_buffer_pool_pages_total';
+select @a/@b;
+```
+
+MySQL 中有一个机制：在准备刷一个脏页的时候，如果这个数据页旁边的数据页刚好是脏页，就会把这个“邻居”也带着一起刷掉；而且这个把“邻居”拖下水的逻辑还可以继续蔓延。
+——可能导致刷脏页时查询更慢。
+在 InnoDB 中，innodb_flush_neighbors 参数就是用来控制这个行为的，值为 1 的时候会有上述的“连坐”机制，值为 0 时表示不找邻居，自己刷自己的。
+机械硬盘下这种机制可以减少随机IO，提高性能，建议设置为1；SSD则没必要，建议设置为0.MySQL 8中已经默认置为0.
+
