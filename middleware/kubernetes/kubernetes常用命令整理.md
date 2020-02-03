@@ -26,6 +26,9 @@ k8s中获取pod日志：
 若pod中包含多个容器，运行kubectl logs时必须通过`-c 容器名称`指定容器名称，即：
 `kubectl logs pod-id -c container-id`
 
+若想获得前一个容器的日志，而不是当前容器的日志，则加上--previous参数
+`kubectl logs pod-id --previous`
+
 当pod被删除，日志也将被删除。想保留需持久化到日志系统中。
 
 ### 向pod发送请求
@@ -82,6 +85,7 @@ spec:
 ## 命名空间相关
 列出kube-system空间下的对象
 `kubectl get pod --namespace kube-system`
+
 
 创建命名空间
 方法1：从YAML文件创建
