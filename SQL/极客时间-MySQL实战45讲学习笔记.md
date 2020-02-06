@@ -481,3 +481,27 @@ alter table t engine=innodb,ALGORITHM=inplace;
 alter table t engine=innodb,ALGORITHM=copy;
 ```
 copy即强制拷贝表，即** MySQL 5.5 版本**之前`alter table A engine=InnoDB`命令的实现，即在mysql server层创建表。
+
+
+## 14 | count(*)这么慢，我该怎么办？
+### count(*) 的实现方式
+在不同的 MySQL 引擎中，count(*) 有不同的实现方式：
+- MyISAM：把一个表的总行数存在了磁盘上，count(*)直接返回这个总行数，效率高
+- InnoDB：执行 count(*)时，一行行扫描，累积计数
+——上述说的是没有过滤条件的count(*)。加where后MyISAM也要扫描很多行。
+
+**为什么 InnoDB 不跟 MyISAM 一样，也把数字存起来呢？**
+这和 InnoDB 的事务设计有关系，可重复读是它默认的隔离级别，在代码上就是通过多版本并发控制，也就是 MVCC 来实现的。每一行记录都要判断自己是否对这个会话可见，因此对于 count(*) 请求来说，InnoDB 只好把数据一行一行地读出依次判断，可见的行才能够用于计算“基于这个查询”的表的总行数。
+
+**在保证逻辑正确的前提下，尽量减少扫描的数据量，是数据库系统设计的通用法则之一。**
+
+- MyISAM 表虽然 count(*) 很快，但是不支持事务；
+- show table status 命令虽然返回很快，但是不准确；
+- InnoDB 表直接 count(*) 会遍历全表，虽然结果准确，但会导致性能问题。
+
+### 用缓存系统保存计数
+将计数保存在缓存系统中的方式，还不只是丢失更新的问题。即使 Redis 正常工作，这个值还是逻辑上不精确的。因为：这两个不同的存储构成的系统，不支持分布式事务，无法拿到精确一致的视图。
+因此，需要将计数保存到数据库里，利用数据库事务保证多个操作数据的一致性。
+
+### 不同的 count 用法
+按照效率排序的话，`count(字段)<count(主键 id)<count(1)≈count(*)`，所以建议尽量使用 count(*)。
