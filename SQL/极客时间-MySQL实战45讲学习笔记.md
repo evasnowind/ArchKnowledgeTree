@@ -579,7 +579,38 @@ tmp_table_size 这个配置限制了内存临时表的大小，默认值是 16M�
 2. 用随机函数生成一个最大值到最小值之间的数 X = (M-N)*rand() + N;
 3. 取不小于 X 的第一个 ID 的行。
 
+## 18 | 为什么这些SQL语句逻辑相同，性能却差异巨大？
+假设表结构如下：
+```
+mysql> CREATE TABLE `tradelog` (
+  `id` int(11) NOT NULL,
+  `tradeid` varchar(32) DEFAULT NULL,
+  `operator` int(11) DEFAULT NULL,
+  `t_modified` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `tradeid` (`tradeid`),
+  KEY `t_modified` (`t_modified`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+```
 
+### 案例一：条件字段函数操作
+
+对索引字段做函数操作，可能会破坏索引值的有序性，因此优化器就决定放弃走树搜索功能。
+例子：
+`select count(*) from tradelog where month(t_modified)=7;`查询效率极低，但用`where t_modified='2018-7-1’`则可以利用到索引、很快返回结果
+
+### 案例二：隐式类型转换
+
+在 MySQL 中，字符串和数字做比较的话，是将字符串转换成数字。
+查询语句`select * from tradelog where tradeid=110717;`相当于执行`select * from tradelog where  CAST(tradid AS signed int) = 110717;`
+由于对索引字段做函数操作，优化器会放弃走树搜索功能。
+
+### 案例三：隐式字符编码转换
+`select * from trade_detail where tradeid=$L2.tradeid.value; `
+实际上等价于`select * from trade_detail  where CONVERT(traideid USING utf8mb4)=$L2.tradeid.value; `
+连接过程中要求在被驱动表的索引字段上加函数操作，是直接导致对被驱动表做全表扫描的原因。
+
+3个案例，实际上都是说一个事情：对索引字段做函数操作，可能会破坏索引值的有序性，因此优化器就决定放弃走树搜索功能。
 
 
 ## 19 | 为什么我只查一行的语句，也执行这么慢？
@@ -590,3 +621,17 @@ tmp_table_size 这个配置限制了内存临时表的大小，默认值是 16M�
 
 ### 第二类：查询慢
 **坏查询不一定是慢查询。**
+
+
+## 20 | 幻读是什么，幻读有什么问题？
+### 幻读是什么？
+
+### 幻读有什么问题？
+1.  语义被破坏
+2.  数据不一致
+
+### 如何解决幻读？
+间隙锁和 next-key lock 的引入，帮我们解决了幻读的问题，但同时也带来了一些“困扰”。
+间隙锁的引入，可能会导致同样的语句锁住更大的范围，这其实是影响了并发度的。
+
+
