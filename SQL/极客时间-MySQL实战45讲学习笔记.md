@@ -648,7 +648,50 @@ mysql> CREATE TABLE `tradelog` (
 - 一个 bug：唯一索引上的范围查询会访问到不满足条件的第一个值为止。
 
 
+
+## 22 | MySQL有哪些“饮鸩止渴”提高性能的方法？
+### 短连接风暴
+max_connections 参数，用来控制一个 MySQL 实例同时存在的连接数的上限，超过这个值，系统就会拒绝接下来的连接请求，并报错提示“Too many connections”
+调高 max_connections参数值？
+——有风险，让更多的连接都可以进来，那么系统的负载可能会进一步加大，大量的资源耗费在权限验证等逻辑上，结果可能是适得其反，已经连接的线程拿不到 CPU 资源去执行业务的 SQL 请求。
+解决：
+1. 第一种方法：先处理掉那些占着连接但是不工作的线程。
+kill connection，这个行为跟事先设置 wait_timeout 的效果是一样的。
+在 show processlist 的结果里，踢掉显示为 sleep 的线程，可能是有损的。——比如断开的是正在事务中的线程
+要看事务具体状态的话，你可以查 information_schema 库的 innodb_trx 表。
+从服务端断开连接使用的是 kill connection + id 的命令
+
+2. 第二种方法：减少连接过程的消耗。
+如果现在数据库确认是被连接行为打挂了，那么一种可能的做法，是让数据库跳过权限验证阶段。
+跳过权限验证的方法是：重启数据库，并使用–skip-grant-tables 参数启动。
+——风险极高
+
+
+### 慢查询性能问题
+在 MySQL 中，会引发性能问题的慢查询，大体有以下三种可能：
+1. 索引没有设计好；
+    重建索引。
+2. SQL 语句没写好；
+   查询重写
+   `select * from t where id + 1 = 10000`
+   利用
+   `
+insert into query_rewrite.rewrite_rules(pattern, replacement, pattern_database) values ("select * from t where id + 1 = ?", "select * from t where id = ? - 1", "db1");
+call query_rewrite.flush_rewrite_rules();
+   `
+3. MySQL 选错了索引。 
+  应急方案就是给这个语句加上 force index。
+  同样地，使用查询重写功能，给原来的语句加上 force index，也可以解决这个问题。
+- 上线前，在测试环境，把慢查询日志（slow log）打开，并且把 long_query_time 设置成 0，确保每个语句都会被记录入慢查询日志；
+- 在测试表里插入模拟线上的数据，做一遍回归测试；
+- 观察慢查询日志里每类语句的输出，特别留意 Rows_examined 字段是否与预期一致。
+
+### QPS 突增问题
+
+
+
 ## 23 | MySQL是怎么保证数据不丢的？
+
 
 
 ## 24 | MySQL是怎么保证主备一致的？
@@ -777,3 +820,54 @@ MySQL 5.6 版本引入了 GTID
 ### 配合 semi-sync 方案
 ### 等主库位点方案
 ### GTID 方案
+
+
+## 29 | 如何判断一个数据库是不是出问题了？
+### select 1 判断
+`innodb_thread_concurrency`参数，控制 InnoDB 的并发线程上限。
+在 InnoDB 中，innodb_thread_concurrency 这个参数的默认值是 0，表示不限制并发线程数量。但是，不限制并发线程数肯定是不行的。通常情况下，我们建议把 innodb_thread_concurrency 设置为 64~128 之间的值。
+**并发连接和并发查询**:在 show processlist 的结果里，看到的几千个连接，指的就是并发连接。而“当前正在执行”的语句，才是我们所说的并发查询。并发连接数达到几千个影响并不大，就是多占一些内存而已。我们应该关注的是并发查询，因为并发查询太高才是 CPU 杀手。
+
+**在线程进入锁等待以后，并发线程的计数会减一。**
+
+### 查表判断
+在系统库（mysql 库）里创建一个表，比如命名为 health_check，里面只放一行数据，然后定期执行`select * from mysql.health_check;`
+可以检测出由于并发线程过多导致的数据库不可用的情况，但空间满了以后，这种方法又会变得不好使。
+
+### 更新判断
+更新判断是一个相对比较常用的方案了，不过依然存在一些问题。其中，“判定慢”一直是让 DBA 头疼的问题。
+
+### 内部统计
+MySQL 5.6 版本以后提供的 performance_schema 库，就在 file_summary_by_event_name 表里统计了每次 IO 请求的时间。
+
+### 小结
+丁奇比较倾向的方案，是优先考虑 update 系统表，然后再配合增加检测 performance_schema 的信息。
+
+
+
+## 31 | 误删数据后除了跑路，还能怎么办？
+
+误删数据分类：
+- 使用 delete 语句误删数据行；
+- 使用 drop table 或者 truncate table 语句误删数据表；
+- 使用 drop database 语句误删数据库；
+- 使用 rm 命令误删整个 MySQL 实例。
+
+### 误删行
+用 Flashback 工具通过闪回把数据恢复回来。 
+不建议直接在主库上执行这些操作。
+
+使用 delete 命令删除的数据，你还可以用 Flashback 来恢复。而使用 truncate /drop table 和 drop database 命令删除的数据，就没办法通过 Flashback 来恢复了。
+
+### 误删库 / 表
+需要使用全量备份，加增量日志.这个方案要求线上有定期的全量备份，并且实时备份 binlog。
+
+### 延迟复制备库
+如果有非常核心的业务，不允许太长的恢复时间，我们可以考虑搭建延迟复制的备库。这个功能是 MySQL 5.6 版本引入的。
+
+### 预防误删库 / 表的方法
+第一条建议是，账号分离。这样做的目的是，避免写错命令。
+第二条建议是，制定操作规范。这样做的目的，是避免写错要删除的表名。
+
+### rm 删除数据
+
