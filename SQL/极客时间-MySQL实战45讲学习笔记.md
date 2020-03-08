@@ -871,3 +871,52 @@ MySQL 5.6 版本以后提供的 performance_schema 库，就在 file_summary_by_
 
 ### rm 删除数据
 
+
+
+## 32 | 为什么还有kill不掉的语句？
+
+在 MySQL 中有两个 kill 命令：
+- kill query + 线程 id，表示终止这个线程中正在执行的语句；
+- kill connection + 线程 id，这里 connection 可缺省，表示断开这个线程的连接，当然如果这个线程有语句正在执行，也是要先停止正在执行的语句的。
+
+### 收到 kill 以后，线程做什么？
+当用户执行 kill query thread_id_B 时，MySQL 里处理 kill 命令的线程做了两件事：
+1. 把 session B 的运行状态改成 THD::KILL_QUERY(将变量 killed 赋值为 THD::KILL_QUERY)；
+2. 给 session B 的执行线程发一个信号。
+
+kill 无效的情况：
+- 第一类情况，即：线程没有执行到判断线程状态的逻辑。
+- 另一类情况是，终止逻辑耗时较长
+
+### 另外两个关于客户端的误解
+#### 第一个误解是：如果库里面的表特别多，连接就会很慢。
+当使用默认参数连接的时候，MySQL 客户端会提供一个本地库名和表名补全的功能。为了实现这个功能，客户端在连接成功后，需要多做一些操作：
+1. 执行 show databases；
+2. 切到 db1 库，执行 show tables；
+3. 把这两个命令的结果用于构建一个本地的哈希表。
+
+第3步最花时间。
+
+**我们感知到的连接过程慢，其实并不是连接慢，也不是服务端慢，而是客户端慢。**
+
+#### –quick 是一个更容易引起误会的参数，也是关于客户端常见的一个误解。
+
+
+## 33 | 我查这么多数据，会不会把数据库内存打爆？
+### 全表扫描对 server 层的影响
+假设要执行：
+```
+mysql -h$host -P$port -u$user -p$pwd -e "select * from db1.t" > $target_file
+```
+
+MySQL 是“边读边发的”
+在服务端 show processlist 看到State 的值一直处于“Sending to client”，就表示服务器端的网络栈写满了。
+**对于正常的线上业务来说，如果一个查询的返回结果不会很多的话，我都建议你使用 mysql_store_result 这个接口，直接把查询结果保存到本地内存。**
+
+### 全表扫描对 InnoDB 的影响
+内存的数据页是在 Buffer Pool (BP) 中管理的，在 WAL 里 Buffer Pool 起到了加速更新的作用。而实际上，Buffer Pool 还有一个更重要的作用，就是加速查询。
+
+内存命中率:可以在show engine innodb status中可以看到“Buffer pool hit rate”字样，显示的就是当前的命中率。
+
+InnoDB Buffer Pool 的大小是由参数 innodb_buffer_pool_size 确定的，一般建议设置成可用物理内存的 60%~80%。
+InnoDB 内存管理用的是最近最少使用 (Least Recently Used, LRU) 算法，但有改进。在 InnoDB 实现上，按照 5:3 的比例把整个 LRU 链表分成了 young 区域和 old 区域。为了处理类似全表扫描的操作量身定制的。
