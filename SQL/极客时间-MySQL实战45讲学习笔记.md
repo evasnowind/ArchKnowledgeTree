@@ -920,3 +920,51 @@ MySQL 是“边读边发的”
 
 InnoDB Buffer Pool 的大小是由参数 innodb_buffer_pool_size 确定的，一般建议设置成可用物理内存的 60%~80%。
 InnoDB 内存管理用的是最近最少使用 (Least Recently Used, LRU) 算法，但有改进。在 InnoDB 实现上，按照 5:3 的比例把整个 LRU 链表分成了 young 区域和 old 区域。为了处理类似全表扫描的操作量身定制的。
+
+
+## 34 | 到底可不可以使用join？
+
+
+## 40 | insert语句的锁为什么这么多？
+### insert … select 语句
+```
+CREATE TABLE `t` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `c` int(11) DEFAULT NULL,
+  `d` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `c` (`c`)
+) ENGINE=InnoDB;
+
+insert into t values(null, 1,1);
+insert into t values(null, 2,2);
+insert into t values(null, 3,3);
+insert into t values(null, 4,4);
+
+create table t2 like t
+```
+
+在可重复读隔离级别下，binlog_format=statement 时执行：
+```
+insert into t2(c,d) select c,d from t;
+```
+时，需要对表 t 的所有行和间隙加锁.
+
+原因：可能出现主备不一致。
+
+insert … select 是很常见的在两个表之间拷贝数据的方法。需要注意，在可重复读隔离级别下，这个语句会给 select 的表里扫描到的记录和间隙加读锁。
+
+### insert 循环写入
+```
+insert into t(c,d)  (select c+1, d from t force index(c) order by c desc limit 1);
+```
+
+要学会用 explain 的结果来“脑补”整条语句的执行过程。
+
+如果 insert 和 select 的对象是同一个表，则有可能会造成循环写入。这种情况下，我们需要引入用户临时表来做优化。
+
+### insert 唯一键冲突
+
+### insert into … on duplicate key update
+insert into … on duplicate key update 这个语义的逻辑是，插入一行数据，如果碰到唯一键约束，就执行后面的更新语句。
+注意，如果有多个列违反了唯一性约束，就会按照索引的顺序，修改跟第一个索引冲突的行。
