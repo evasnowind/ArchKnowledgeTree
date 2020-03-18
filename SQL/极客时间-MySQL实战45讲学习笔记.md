@@ -1023,7 +1023,82 @@ select v from ht where k >= M order by t_modified desc limit 100;
 
 
 ## 37 | 什么时候会使用内部临时表？
+### union 执行流程
+`union`会创建内部临时表，将数据合并；`union all`则不会创建临时表。
 
+### group by 执行流程
+`group by`
+注意，**内存临时表的大小是有限制的，参数 tmp_table_size 就是控制这个内存大小的，默认是 16M。**内存临时表的大小超过该变量规定大小，那么，这时候就会把内存临时表转成磁盘临时表，磁盘临时表默认使用的引擎是 InnoDB。
+```
+set tmp_table_size=1024; # 把内存临时表的大小限制为最大 1024 字节
+select id%100 as m, count(*) as c from t1 group by m order by null limit 10;
+```
+
+### group by 优化方法 -- 索引
+不论是使用内存临时表还是磁盘临时表，group by 逻辑都需要构造一个带唯一索引的表，执行代价都是比较高的。
+优化思路：group by的输入数据有序时，可以避免使用临时表。
+——做法：在 MySQL 5.7 版本支持了 generated column 机制，用来实现列数据的关联更新。你可以用下面的方法创建一个列 z，然后在 z 列上创建一个索引（如果是 MySQL 5.6 及之前的版本，你也可以创建普通列和索引，来解决这个问题）。
+```
+alter table t1 add column z int generated always as(id % 100), add index(z);
+select z, count(*) as c from t1 group by z;
+```
+
+### group by 优化方法 -- 直接排序
+在 group by 语句中加入 SQL_BIG_RESULT 这个提示（hint），就可以告诉优化器：这个语句涉及的数据量很大，请直接用磁盘临时表。
+```
+select SQL_BIG_RESULT id%100 as m, count(*) as c from t1 group by m;
+```
+
+丁奇总结的指导原则：
+- 如果对 group by 语句的结果没有排序要求，要在语句后面加 order by null；
+- 尽量让 group by 过程用上表的索引，确认方法是 explain 结果里没有 Using temporary 和 Using filesort；
+- 如果 group by 需要统计的数据量不大，尽量只使用内存临时表；
+- 也可以通过适当调大 tmp_table_size 参数，来避免用到磁盘临时表；
+- 如果数据量实在太大，使用 SQL_BIG_RESULT 这个提示，来告诉优化器直接使用排序算法得到 group by 的结果。
+
+
+## 38 | 都说InnoDB好，那还要不要使用Memory引擎？
+### 内存表的数据组织结构
+InnoDB是一棵B+树。
+Memory 引擎的数据和索引是分开的。
+
+- InnoDB 引擎把数据放在主键索引上，其他索引上保存的是主键 id。这种方式，我们称之为索引组织表（Index Organizied Table）。
+  - 有序
+- Memory 引擎采用的是把数据单独存放，索引上保存数据位置的数据组织形式，我们称之为堆组织表（Heap Organizied Table）。
+  - 无序，hash索引
+
+### 不建议在生产环境上使用内存表
+- 锁粒度问题
+  - 内存表不支持行锁，只支持表锁。因此，一张表只要有更新，就会堵住其他所有在这个表上的读写操作。
+- 数据持久化问题
+  - 数据在内存中，容易出现数据不一致
+
+**基于内存表的特性，我们还分析了它的一个适用场景，就是内存临时表。内存表支持 hash 索引，这个特性利用起来，对复杂查询的加速效果还是很不错的。**
+
+## 39 | 自增主键为什么不是连续的？
+
+### 自增值保存在哪儿？
+表的结构定义存放在后缀名为.frm 的文件中，但是并不会保存自增值。
+- MyISAM 引擎的自增值保存在数据文件中
+- InnoDB 引擎的自增值，其实是保存在了内存里。MySQL 直到 8.0 版本，才给 InnoDB 表的自增值加上了持久化的能力，确保重启前后一个表的自增值不变。
+
+### 自增值修改机制
+从 auto_increment_offset 开始，以 auto_increment_increment 为步长
+这两个参数系统默认是1，但某些情况使用的不是默认值。比如：双 M 的主备结构里要求双写的时候，就可能会设置成 auto_increment_increment=2，让一个库的自增id是奇数，另一个是偶数，避免两个库发生冲突。
+
+### 自增值的修改时机
+自增主键 id 不连续的原因：
+- 1. 唯一键冲突
+- 2. 事务回滚也会产生类似的现象
+  - 为了提高性能
+- 3. 对于批量插入数据的语句，MySQL 有一个批量申请自增 id 的策略
+
+### 自增锁的优化
+
+在生产上，尤其是有 insert … select 这种批量插入数据的场景时，从并发插入数据性能的角度考虑，我建议你这样设置：innodb_autoinc_lock_mode=2 ，并且 binlog_format=row. 这样做，既能提升并发性，又不会出现数据一致性问题。
+——批量插入数据，包含的语句类型是 insert … select、replace … select 和 load data 语句。
+
+MySQL 5.1.22 版本开始引入的参数 innodb_autoinc_lock_mode，控制了自增值申请时的锁范围。从并发性能的角度考虑，我建议你将其设置为 2，同时将 binlog_format 设置为 row。我在前面的文章中其实多次提到，binlog_format 设置为 row，是很有必要的。
 
 
 ## 40 | insert语句的锁为什么这么多？
@@ -1077,3 +1152,9 @@ grant 语句会同时修改数据表和内存，判断权限的时候使用的�
 ### flush privileges 使用场景
 flush privileges 语句本身会用数据表的数据重建一份内存权限数据，所以在权限数据可能存在不一致的情况下再使用。而这种不一致往往是由于直接用 DML 语句操作系统权限表导致的，所以我们尽量不要使用这类语句。
 
+
+
+
+## 43 | 要不要使用分区表？
+
+### 分区表是什么？  
