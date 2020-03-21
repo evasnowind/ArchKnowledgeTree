@@ -544,7 +544,6 @@ copy即强制拷贝表，即** MySQL 5.5 版本**之前`alter table A engine=Inn
 
 ## 16 | “order by”是怎么工作的？
 
-
 ### 全字段排序
 sort_buffer_size，就是 MySQL 为排序开辟的内存（sort_buffer）的大小。如果要排序的数据量小于 sort_buffer_size，排序就在内存中完成。但如果排序数据量太大，内存放不下，则不得不利用磁盘临时文件辅助排序。
 
@@ -1158,3 +1157,53 @@ flush privileges 语句本身会用数据表的数据重建一份内存权限数
 ## 43 | 要不要使用分区表？
 
 ### 分区表是什么？  
+
+
+
+
+## 44 | 答疑文章（三）：说一说这些好问题
+### join 的写法
+
+在 MySQL 里，NULL 跟任何值执行等值判断和不等值判断的结果，都是 NULL。这里包括， select NULL = NULL 的结果，也是返回 NULL。
+
+即使我们在 SQL 语句中写成 left join，执行过程还是有可能不是从左到右连接的。也就是说，**使用 left join 时，左边的表不一定是驱动表。**
+**如果需要 left join 的语义，就不能把被驱动表的字段放在 where 条件里面做等值判断或不等值判断，必须都写在 on 里面。**
+
+### Simple Nested Loop Join 的性能问题
+虽然 BNL 算法和 Simple Nested Loop Join 算法都是要判断 M*N 次（M 和 N 分别是 join 的两个表的行数），但是 Simple Nested Loop Join 算法的每轮判断都要走全表扫描，因此性能上 BNL 算法执行起来会快很多。
+
+### distinct 和 group by 的性能
+如果只需要去重，不需要执行聚合函数，distinct 和 group by 哪种效率高一些呢？
+即如下场景：
+```
+select a from t group by a order by null;
+select distinct a from t;
+```
+答案：执行流程一样，性能是相同的。
+
+### 备库自增主键问题
+自增 id 的生成顺序，和 binlog 的写入顺序可能是不同的
+SET INSERT_ID 语句是固定跟在 insert 语句
+
+
+## 45 | 自增id用完怎么办？
+### 表定义自增值 id
+表定义的自增值达到上限后的逻辑是：再申请下一个 id 时，得到的值保持不变。
+
+### InnoDB 系统自增 row_id
+如果你创建的 InnoDB 表没有指定主键，那么 InnoDB 会给你创建一个不可见的，长度为 6 个字节的 row_id。row_id 达到上限后，则会归 0 再重新递增，如果出现相同的 row_id，后写的数据会覆盖之前的数据。
+我们应该在 InnoDB 表中主动创建自增主键。因为，表自增 id 到达上限后，再插入数据时报主键冲突错误，是更能被接受的。
+
+### Xid
+MySQL 内部维护了一个全局变量 global_query_id，每次执行语句的时候将它赋值给 Query_id，然后给这个变量加 1。如果当前语句是这个事务执行的第一条语句，那么 MySQL 还会同时把 Query_id 赋值给这个事务的 Xid。
+而 global_query_id 是一个纯内存变量，重启之后就清零了。在同一个数据库实例中，不同事务的 Xid 也是有可能相同的。但是 MySQL 重启之后会重新生成新的 binlog 文件，这就保证了，同一个 binlog 文件里，Xid 一定是惟一的。
+
+### Innodb trx_id
+Xid 是由 server 层维护的。InnoDB 内部使用 Xid，就是为了能够在 InnoDB 事务和 server 之间做关联。但是，InnoDB 自己的 trx_id，是另外维护的。
+InnoDB 内部维护了一个 max_trx_id 全局变量，每次需要申请一个新的 trx_id 时，就获得 max_trx_id 的当前值，然后并将 max_trx_id 加 1。
+InnoDB 的 max_trx_id 递增值每次 MySQL 重启都会被保存起来
+
+只读事务不分配 trx_id。
+
+### thread_id
+thread_id：系统保存了一个全局变量 thread_id_counter，每新建一个连接，就将 thread_id_counter 赋值给这个新连接的线程变量。

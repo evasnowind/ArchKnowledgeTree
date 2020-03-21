@@ -109,7 +109,8 @@ $\color{red}{共享同一个 ForkJoinPool!!!}$
 # 加餐1 | 带你吃透课程中Java 8的那些重要知识点（上）
 ## Lambda 表达式
 Lambda 表达式如何匹配 Java 的类型系统呢？
-——函数式接口
+——函数式接口是一种只有单一抽象方法的接口，使用 @FunctionalInterface 来描述，可以隐式地转换成 Lambda 表达式。
+
 
 ## 使用 Java 8 简化代码
 - 使用 Stream 简化集合操作
@@ -117,3 +118,26 @@ Lambda 表达式如何匹配 Java 的类型系统呢？
 - JDK8 结合 Lambda 和 Stream 对各种类的增强
 
 ## 并行流
+
+# 加餐2 | 带你吃透课程中Java 8的那些重要知识点（下）
+
+## Stream 操作详解
+### 创建流
+
+### filter
+
+### map
+
+### flatMap
+
+### sorted
+
+### distinct
+
+### skip & limit
+
+### collect
+
+### groupBy
+
+### partitionBy
