@@ -118,6 +118,47 @@ Lambda 表达式如何匹配 Java 的类型系统呢？
 - JDK8 结合 Lambda 和 Stream 对各种类的增强
 
 ## 并行流
+常见的5种多线程执行实现
+### 1. 使用线程
+调用CountDownLatch阻塞主线程
+```
+IntStream.rangeClosed(1, threadCount).mapToObj(i -> new Thread(() -> { //手动把taskCount分成taskCount份，每一份有一个线程执行 IntStream.rangeClosed(1, taskCount / threadCount).forEach(j -> increment(atomicInteger)); //每一个线程处理完成自己那部分数据之后，countDown一次 countDownLatch.countDown(); })).forEach(Thread::start);
+```
+### 2. 使用线程池
+比如JDK自己提供的线程池，规定好线程池数量
+```
+//初始化一个线程数量=threadCount的线程池 ExecutorService executorService = Executors.newFixedThreadPool(threadCount); //所有任务直接提交到线程池处理 
+IntStream.rangeClosed(1, taskCount).forEach(i -> executorService.execute(() -> increment(atomicInteger)));
+```
+
+### 3. 使用 ForkJoinPool 而不是普通线程池执行任务。
+ForkJoinPool 和传统的 ThreadPoolExecutor 区别在于，前者对于 n 并行度有 n 个独立队列，后者是共享队列。如果有大量执行耗时比较短的任务，ThreadPoolExecutor 的单队列就可能会成为瓶颈。这时，使用 ForkJoinPool 性能会更好。
+**ForkJoinPool 更适合大任务分割成许多小任务并行执行的场景，而 ThreadPoolExecutor 适合许多独立任务并发执行的场景。**
+```
+ForkJoinPool forkJoinPool = new ForkJoinPool(threadCount); //所有任务直接提交到线程池处理 
+forkJoinPool.execute(() -> IntStream.rangeClosed(1, taskCount).parallel().forEach(i -> increment(atomicInteger)));
+```
+
+### 4. 直接使用并行流
+并行流使用公共的 ForkJoinPool，也就是 ForkJoinPool.commonPool()。
+```
+System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", String.valueOf(threadCount));
+IntStream.rangeClosed(1, taskCount).parallel().forEach(i -> increment(atomicInteger));
+```
+### 5. 使用 CompletableFuture 来实现
+使用 CompletableFuture 来实现。CompletableFuture.runAsync 方法可以指定一个线程池，一般会在使用 CompletableFuture 的时候用到：
+```
+CompletableFuture.runAsync(() -> IntStream.rangeClosed(1, taskCount).parallel().forEach(i -> increment(atomicInteger)), forkJoinPool).get();
+```
+
+3是完全自定义一个ForkJoinPool，4是使用公共的ForkJoinPool，只不过设置了更大的并行度，5是演示CompletableFuture可以使用自定义的ForkJoinPool。
+
+如果你的程序对性能要求特别敏感，建议通过性能测试根据场景决定适合的模式。一般而言，使用线程池（第二种）和直接使用并行流（第四种）的方式在业务代码中比较常用。但需要注意的是，我们通常会重用线程池，而不会像 Demo 中那样在业务逻辑中直接声明新的线程池，等操作完成后再关闭。
+
+
+一定是先运行 stream 方法再运行 forkjoin 方法，对公共 ForkJoinPool 默认并行度的修改才能生效。
+
+建议：**设置 ForkJoinPool 公共线程池默认并行度的操作，应该放在应用启动时设置。**
 
 # 加餐2 | 带你吃透课程中Java 8的那些重要知识点（下）
 
@@ -141,3 +182,33 @@ Lambda 表达式如何匹配 Java 的类型系统呢？
 ### groupBy
 
 ### partitionBy
+
+
+# 05 | HTTP调用：你考虑到超时、重试、并发了吗？
+## 1. 配置连接超时和读取超时参数的学问
+
+### 连接超时参数和连接超时的误区有这么两个：
+- 连接超时配置得特别长，比如 60 秒。
+- 排查连接超时问题，却没理清连的是哪里。
+
+
+### 读取超时参数和读取超时则会有更多的误区，此处将其归纳为如下三个
+- 认为出现了读取超时，服务端的执行就会中断。
+- 认为读取超时只是 Socket 网络层面的概念，是数据传输的最长耗时，故将其配置得非常短，比如 100 毫秒。
+- 认为超时时间越长任务接口成功率就越高，将读取超时参数配置得太长。
+
+## 2. Feign 和 Ribbon 配合使用，你知道怎么配置超时吗？
+
+### 结论一，默认情况下 Feign 的读取超时是 1 秒，如此短的读取超时算是坑点一。
+
+### 结论二，也是坑点二，如果要配置 Feign 的读取超时，就必须同时配置连接超时，才能生效。
+
+### 结论三，单独的超时可以覆盖全局超时，这符合预期，不算坑：
+
+### 结论四，除了可以配置 Feign，也可以配置 Ribbon 组件的参数来修改两个超时时间。这里的坑点三是，参数首字母要大写，和 Feign 的配置不同。
+
+### 结论五，同时配置 Feign 和 Ribbon 的超时，以 Feign 为准。
+
+## 3. 你是否知道 Ribbon 会自动重试请求呢？
+
+## 4. 并发限制了爬虫的抓取能力
