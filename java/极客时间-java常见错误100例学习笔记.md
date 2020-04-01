@@ -370,3 +370,88 @@ Lombok的@Data注解，equal和hashCode方法忽视某些字段的方法：字�
 @EqualsAndHashCode(callSuper = true)
 class Employee extends Person {
 ```
+
+
+# 09 | 数值计算：注意精度、舍入和溢出问题
+
+## 1. “危险”的 Double
+
+float/double类型有精度丢失问题
+
+使用 BigDecimal 表示和计算浮点数，且务必**使用字符串的构造方法来初始化 BigDecimal**。double可以使用`Double.toString()`方法
+如果一定要用 Double 来初始化 BigDecimal 的话，可以使用 `BigDecimal.valueOf` 方法，以确保其表现和字符串形式的构造方法一致，这也是官方文档更推荐的方式
+
+## 2. 考虑浮点数舍入和格式化的方式
+
+浮点数的舍入、字符串格式化也要通过 BigDecimal 进行。
+
+## 3. 用 equals 做判等，就一定是对的吗？
+BigDecimal 的 equals 方法的注释中说明了原因，equals 比较的是 BigDecimal 的 value 和 scale
+
+**如果我们希望只比较 BigDecimal 的 value，可以使用 compareTo 方法**
+
+BigDecimal 的 equals 和 hashCode 方法会同时考虑 value 和 scale，如果结合 HashSet 或 HashMap 使用的话就可能会出现麻烦。比如：
+```
+Set<BigDecimal> hashSet1 = new HashSet<>();
+hashSet1.add(new BigDecimal("1.0"));
+System.out.println(hashSet1.contains(new BigDecimal("1")));//返回false
+```
+
+解决方案：
+- 方案1：使用 TreeSet 替换 HashSet。TreeSet 不使用 hashCode 方法，也不使用 equals 比较元素，而是使用 compareTo 方法，所以不会有问题。
+- 方案2：把 BigDecimal 存入 HashSet 或 HashMap 前，先使用 stripTrailingZeros 方法去掉尾部的零，比较的时候也去掉尾部的 0，确保 value 相同的 BigDecimal，scale 也是一致的
+
+## 4. 小心数值溢出问题
+不管是 int 还是 long，所有的基本数值类型都有超出表达范围的可能性。
+基本数据类型的加减乘除计算，溢出时不会抛出异常。
+解决：
+- 方案1：考虑使用 Math 类的 addExact、subtractExact 等 xxExact 方法进行数值运算，这些方法可以在数值溢出时主动抛出异常。
+- 方案2：使用大数类 BigInteger。
+
+
+# 10 | 集合类：坑满地的List列表操作
+## 1. 使用 Arrays.asList 把数据转换为 List 的三个坑
+### 1.1 不能直接使用 Arrays.asList 来转换基本类型数组
+```
+int[] arr1 = {1, 2, 3};
+List list1 = Arrays.stream(arr1).boxed().collect(Collectors.toList());
+log.info("list:{} size:{} class:{}", list1, list1.size(), list1.get(0).getClass());
+
+Integer[] arr2 = {1, 2, 3};
+List list2 = Arrays.asList(arr2);
+log.info("list:{} size:{} class:{}", list2, list2.size(), list2.get(0).getClass());
+``` 
+若arr1直接传入Arrays.asList，将会丢失数据，原因：Arrays.asList泛型只能把 int 装箱为 Integer，不可能把 int 数组装箱为 Integer 数组。
+
+### 1.2 Arrays.asList 返回的 List 不支持增删操作
+Arrays.asList 返回的 List 是Arrays类内部的ArrayList，其增删方法直接抛出异常：`UnsupportedOperationException`
+
+### 1.3 对原始数组的修改会影响到我们获得的那个 List。
+**这个很重要！！！**
+解决：重新new一个ArrayList
+
+## 2. 使用 List.subList 进行切片操作居然会导致 OOM？
+
+subList 方法可以看到获得的 List 其实是内部类 SubList，并不是普通的 ArrayList，在初始化的时候传入了 this。
+SubList 初始化的时候，并没有把原始 List 中的元素复制到独立的变量中保存。我们可以认为 SubList 是原始 List 的视图，并不是独立的 List。双方对元素的修改会相互影响，而且 SubList 强引用了原始的 List，所以**大量保存这样的 SubList 会导致 OOM。**
+
+解决：
+- 1、不直接使用subList方法返回的SubList，而是new ArrayList，构建独立的List
+- 2、对于 Java 8 使用 Stream 的 skip 和 limit API 来跳过流中的元素，以及限制流中元素的个数，达到subList的效果
+```
+List subList = list.stream().skip(1).limit(3).collect(Collectors.toList());
+```
+
+## 3. 一定要让合适的数据结构做合适的事情
+
+### 误区1：使用数据结构不考虑平衡时间和空间
+要对大 List 进行单值搜索的话，可以考虑使用 HashMap，其中 Key 是要搜索的值，Value 是原始对象，会比使用 ArrayList 有非常明显的性能优势
+
+在应用内存吃紧的情况下，我们需要考虑是否值得使用更多的内存消耗来换取更高的性能。这里我们看到的是平衡的艺术，空间换时间，还是时间换空间，只考虑任何一个方面都是不对的。
+
+如果业务代码中有频繁的大 ArrayList 搜索，使用 HashMap 性能会好很多。类似，如果要对大 ArrayList 进行去重操作，也不建议使用 contains 方法，而是可以考虑使用 HashSet 进行去重。
+
+平衡的艺术，空间换时间，还是时间换空间，只考虑任何一个方面都是不对的
+
+
+
