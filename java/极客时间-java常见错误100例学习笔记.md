@@ -455,3 +455,108 @@ List subList = list.stream().skip(1).limit(3).collect(Collectors.toList());
 
 
 
+# 11 | 空值处理：分不清楚的null和恼人的空指针
+
+## 1. 修复和定位恼人的空指针问题
+
+NullPointerException 最可能出现的场景归为以下 5 种：
+- 参数值是 Integer 等包装类型，使用时因为自动拆箱出现了空指针异常；
+- 字符串比较出现空指针异常；
+- 诸如 ConcurrentHashMap 这样的容器不支持 Key 和 Value 为 null，强行 put null 的 Key 或 Value 会出现空指针异常；
+- A 对象包含了 B，在通过 A 对象的字段获得 B 之后，没有对字段判空就级联调用 B 的方法出现空指针异常；
+- 方法或远程服务返回的 List 不是空而是 null，没有进行判空就直接调用 List 的方法出现空指针异常。
+
+**阿里开源的 Java 故障诊断 Arthas**
+
+修复思路如下：
+- 对于 Integer 的判空，可以使用 Optional.ofNullable 来构造一个 Optional，然后使用 orElse(0)
+- 对于 String 和字面量的比较，可以把字面量放在前面
+- 对于 ConcurrentHashMap，既然其 Key 和 Value 都不支持 null，修复方式就是不要把 null 存进去。
+- 对于类似 fooService.getBarService().bar().equals(“OK”) 的级联调用，需要判空的地方有很多， 可以使用**Optional**类简化
+  - 改为如下：
+   ```
+            Optional.ofNullable(fooService)
+                .map(FooService::getBarService)
+                .filter(barService -> "OK".equals(barService.bar()))
+                .ifPresent(result -> log.info("OK"));
+   ```
+- 对于 rightMethod 返回的 List，由于不能确认其是否为 null，所以在调用 size 方法获得列表大小之前，同样可以使用 Optional.ofNullable 包装一下返回值，然后通过.orElse(Collections.emptyList()) 实现在 List 为 null 的时候获得一个空的 List
+
+**使用判空方式或 Optional 方式来避免出现空指针异常，不一定是解决问题的最好方式，空指针没出现可能隐藏了更深的 Bug。**
+
+## 2. POJO 中属性的 null 到底代表了什么？
+
+注意字符串格式化时可能会把 null 值格式化为 null 字符串。
+数据库字段允许保存 null，会进一步增加出错的可能性和复杂度。
+
+尽量不要：使用一个POJO同时扮演 DTO 和数据库 Entity
+可以巧妙使用 Optional 来区分客户端不传值和传 null 值
+```
+@Datapublic class UserDto { 
+  private Long id; 
+  private Optional name; 
+  private Optional age;
+}
+```
+
+## 3. 小心 MySQL 中有关 NULL 的三个坑
+- MySQL 中 sum 函数没统计到任何记录时，会返回 null 而不是 0，可以使用 IFNULL 函数把 null 转换为 0；
+- MySQL 中 count 字段不统计 null 值，COUNT(*) 才是统计所有记录数量的正确方式。
+- MySQL 中 =NULL 并不是判断条件而是赋值，对 NULL 进行判断只能使用 IS NULL 或者 IS NOT NULL。
+
+
+## 4. 总结
+业务系统最基本的标准是不能出现未处理的空指针异常，因为它往往代表了业务逻辑的中断，所以建议每天查询一次生产日志来排查空指针异常，有条件的话建议订阅空指针异常报警，以便及时发现及时处理。
+
+
+# 12 | 异常处理：别让自己在出问题的时候变为瞎子
+
+## 1. 捕获和处理异常容易犯的错
+- 错误1：不在业务代码层面考虑异常处理，仅在框架层面粗犷捕获和处理异常。
+  - 解决：
+    - 如果异常上升到最上层逻辑还是无法处理的话，可以以统一的方式进行异常转换，比如通过 @RestControllerAdvice + @ExceptionHandler，来捕获这些“未处理”异常：
+      - 对于自定义的业务异常：记录warn级别日志，返回合适的API包装体
+      - 对于无法处理的系统异常：记录Error 级别日志，转换为普适的“服务器忙，请稍后再试”异常信息，同样以 API 包装体返回给调用方。
+- 错误2：捕获了异常后直接生吞
+- 错误3：丢弃异常的原始信息
+- 错误4：抛出异常时不指定任何消息
+
+
+**如果你捕获了异常打算处理的话，除了通过日志正确记录异常原始信息外，通常还有三种处理模式：**
+- 转换，即转换新的异常抛出。
+- 重试，即重试之前的操作。
+- 恢复，即尝试进行降级处理，或使用默认值来替代原始数据。
+
+## 2. 小心 finally 中的异常
+修复方法：
+- 1. finally 代码块自己负责异常捕获和处理
+- 2. 可以把 try 中的异常作为主异常抛出，使用**addSuppressed**方法把 finally 中的异常附加到主异常上
+  - 使用实现了 AutoCloseable 接口的资源，务必使用 try-with-resources 模式来使用资源，确保资源可以正确释放，也同时确保异常可以正确处理。
+
+## 2. 千万别把异常定义为静态变量
+**把异常定义为静态变量会导致异常信息固化**，这就和异常的栈一定是需要根据当前调用来动态获取相矛盾。
+解决：改一下 Exceptions 类的实现，通过不同的方法把每一种异常都 new 出来抛出即可
+
+## 3. 提交线程池的任务出了异常会怎么样？
+
+解决：
+- 1. 以 execute 方法提交到线程池的异步任务，最好在任务内部做好异常处理；
+- 2. 设置自定义的异常处理程序作为保底，比如:
+  - 2.1 在声明线程池时自定义线程池的未捕获异常处理程序
+    ```
+    new ThreadFactoryBuilder()
+    .setNameFormat(prefix+"%d")
+    .setUncaughtExceptionHandler((thread, throwable)-> log.error("ThreadPool {} got exception", thread, throwable))
+    .get()
+    ```
+  - 2.2 或者设置全局的默认未捕获异常处理程序
+    ```
+    static {
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable)-> log.error("Thread {} got exception", thread, throwable));
+    }
+    ```
+
+
+线程池 ExecutorService 的 execute 方法提交任务到线程池处理，如果出现异常会导致线程退出，控制台输出中可以看到异常信息；
+把 execute 方法改为 submit，线程还会退出，异常信息会被生吞，只有在调用 get 方法获取 FutureTask 结果的时候，才会以 ExecutionException 的形式重新抛出异常。
+解决：把 submit 返回的 Future 放到了 List 中，随后遍历 List 来捕获所有任务的异常。这么做确实合乎情理。既然是以 submit 方式来提交任务，那么我们应该关心任务的执行结果，否则应该以 execute 来提交任务
