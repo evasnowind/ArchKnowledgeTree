@@ -709,3 +709,18 @@ BufferedInputStream 和 BufferedOutputStream在内部实现了一个默认 8KB �
 ## 2. 注意 Jackson JSON 反序列化对额外字段的处理
 通过设置 JSON 序列化工具 Jackson 的 activateDefaultTyping 方法，可以在序列化数据时写入对象类型。其实，Jackson 还有很多参数可以控制序列化和反序列化，是一个功能强大而完善的序列化工具。
 
+Jackson 针对序列化和反序列化有大量的细节功能特性，我们可以参考 Jackson 官方文档来了解这些特性，详见SerializationFeature、DeserializationFeature和[MapperFeature](https://fasterxml.github.io/jackson-databind/javadoc/2.10/com/fasterxml/jackson/databind/MapperFeature.html)。
+
+忽略多余字段，是我们写业务代码时最容易遇到的一个配置项。Spring Boot 在自动配置时贴心地做了全局设置。如果需要设置更多的特性，可以直接修改配置文件 spring.jackson.** 或设置 Jackson2ObjectMapperBuilderCustomizer 回调接口，来启用更多设置，无需重新定义 ObjectMapper Bean。
+
+
+## 3. 反序列化时要小心类的构造方法
+
+默认情况下，在反序列化的时候，Jackson 框架只会调用无参构造方法创建对象。
+
+如果走自定义的构造方法创建对象，需要通过 @JsonCreator 来指定构造方法，并通过 @JsonProperty 设置构造方法中参数对应的 JSON 属性名：
+
+## 4. 枚举作为 API 接口参数或返回值的两个大坑
+- 客户端和服务端的枚举定义不一致时，会出异常。
+  - 要解决这个问题，可以开启 Jackson 的 read_unknown_enum_values_using_default_value 反序列化特性，也就是在枚举值未知的时候使用默认值
+- 枚举序列化反序列化实现自定义的字段非常麻烦，会涉及 Jackson 的 Bug。
