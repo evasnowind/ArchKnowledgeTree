@@ -198,6 +198,11 @@ public object GetProductListNew() {
 
 
 
+# 参考资料
+- [缓存穿透，缓存击穿，缓存雪崩解决方案分析](https://blog.csdn.net/zeb_perfect/article/details/54135506)
+- [实例解读什么是Redis缓存穿透、缓存雪崩和缓存击穿](https://baijiahao.baidu.com/s?id=1619572269435584821&wfr=spider&for=pc)
+- [Redis缓存穿透、缓存雪崩、redis并发问题分析](https://blog.csdn.net/fanrenxiang/article/details/80542580)
+- 
 
 redis如何持久化
 

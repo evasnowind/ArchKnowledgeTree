@@ -724,3 +724,18 @@ Jackson 针对序列化和反序列化有大量的细节功能特性，我们可
 - 客户端和服务端的枚举定义不一致时，会出异常。
   - 要解决这个问题，可以开启 Jackson 的 read_unknown_enum_values_using_default_value 反序列化特性，也就是在枚举值未知的时候使用默认值
 - 枚举序列化反序列化实现自定义的字段非常麻烦，会涉及 Jackson 的 Bug。
+
+
+# 16 | 用好Java 8的日期时间类，少踩一些“老三样”的坑
+
+## 1. 初始化日期时间
+
+
+## 2. “恼人”的时区问题
+
+要正确处理时区，在于存进去和读出来两方面：存的时候，需要使用正确的当前时区来保存，这样 UTC 时间才会正确；读的时候，也只有正确设置本地时区，才能把 UTC 时间转换为正确的当地时间。
+
+Java 8 推出了新的时间日期类 ZoneId、ZoneOffset、LocalDateTime、ZonedDateTime 和 DateTimeFormatter
+
+## 3. 日期时间格式化和解析
+
