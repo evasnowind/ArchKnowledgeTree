@@ -739,3 +739,20 @@ Java 8 推出了新的时间日期类 ZoneId、ZoneOffset、LocalDateTime、Zone
 
 ## 3. 日期时间格式化和解析
 
+SimpleDateFormat 著名的3个坑：
+- “这明明是一个 2019 年的日期，怎么使用 SimpleDateFormat 格式化后就提前跨年了”
+  - SimpleDateFormat 的各种格式化模式:JDK 的文档中有说明：小写 y 是年，而大写 Y 是 week year，也就是所在的周属于哪一年。
+- 定义的 static 的 SimpleDateFormat 可能会出现线程安全问题。
+  - 只能在同一个线程复用 SimpleDateFormat，比较好的解决方式是，通过 ThreadLocal 来存放 SimpleDateFormat
+- 当需要解析的字符串和格式不匹配的时候，SimpleDateFormat 表现得很宽容，还是能得到结果。
+
+对于 SimpleDateFormat 的这三个坑，我们使用 Java 8 中的 DateTimeFormatter 就可以避过去。首先，使用 DateTimeFormatterBuilder 来定义格式化字符串，不用去记忆使用大写的 Y 还是小写的 Y，大写的 M 还是小写的 m。
+
+DateTimeFormatter 是线程安全的，可以定义为 static 使用；最后，DateTimeFormatter 的解析比较严格，需要解析的字符串和格式不匹配时，会直接报错
+
+## 4. 日期时间的计算
+对日期时间做计算操作，Java 8 日期时间 API 会比 Calendar 功能强大很多。
+
+Java 8 中有一个专门的类 Period 定义了日期间隔，通过 Period.between 得到了两个 LocalDate 的差，返回的是两个日期差几年零几月零几天。如果希望得知两个日期之间差几天，直接调用 Period 的 getDays() 方法得到的只是最后的“零几天”，而不是算总的间隔天数。
+
+
