@@ -784,3 +784,35 @@ XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=. -XX:+PrintGCDateStamps -XX:+Pr
 ```
 
 
+# 18 | 当反射、注解和泛型遇到OOP时，会有哪些坑？
+
+## 1. 反射调用方法不是以传参决定重载
+反射调用方法，是以反射获取方法时传入的方法名称和参数类型来确定调用方法的。
+
+## 2. 泛型经过类型擦除多出桥接方法的坑
+
+使用反射查询类方法清单时，我们要注意两点：
+- getMethods 和 getDeclaredMethods 是有区别的，前者可以查询到父类方法，后者只能查询到当前类。
+- 反射进行方法调用要注意过滤桥接方法。
+
+
+## 3. 注解可以继承吗？
+子类以及子类的方法，无法自动继承父类和父类方法上的注解。
+自定义注解可以通过标记元注解 @Inherited 实现注解的继承，不过这只适用于类。如果要继承定义在接口或方法上的注解，可以使用 Spring 的工具类 AnnotatedElementUtils，并注意各种 getXXX 方法和 findXXX 方法的区别，详情查看[Spring 的文档](https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/core/annotation/AnnotatedElementUtils.html)。
+
+
+# 19 | Spring框架：IoC和AOP是扩展的核心
+
+## 1. 单例的 Bean 如何注入 Prototype 的 Bean？
+**在为类标记上 @Service 注解把类型交由容器管理前，首先评估一下类是否有状态，然后为 Bean 设置合适的 Scope。**
+
+
+单例的 Bean 如何注入 Prototype 的 Bean 这个问题:Controller 标记了 @RestController 注解，而 @RestController 注解 =@Controller 注解 +@ResponseBody 注解，又因为 @Controller 标记了 @Component 元注解，所以 @RestController 注解其实也是一个 Spring Bean.
+
+Bean 默认是单例的，所以单例的 Controller 注入的 Service 也是一次性创建的，即使 Service 本身标识了 prototype 的范围也没用。
+
+修复方式是，让 Service 以代理方式注入。这样虽然 Controller 本身是单例的，但每次都能从代理获取 Service。这样一来，prototype 范围的配置才能真正生效：
+```
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
+```
+
