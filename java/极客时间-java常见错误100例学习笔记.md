@@ -816,3 +816,14 @@ Bean 默认是单例的，所以单例的 Controller 注入的 Service 也是一
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
 ```
 
+## 
+如果要为单例的 Bean 注入 Prototype 的 Bean，绝不是仅仅修改 Scope 属性。由于单例的 Bean 在容器启动时就会完成一次性初始化。最简单的解决方案是，把 Prototype 的 Bean 设置为通过代理注入，也就是设置 proxyMode 属性为 TARGET_CLASS。
+
+
+## 3. AOP切面顺序
+如果一组相同类型的 Bean 是有顺序的，需要明确使用 @Order 注解来设置顺序。两个不同优先级切面中 @Before、@After 和 @Around 三种增强的执行顺序:
+- 入操作（Around（连接点执行前）、Before），切面优先级越高，越先执行。
+- 出操作（Around（连接点执行后）、After、AfterReturning、AfterThrowing），切面优先级越低，越先执行。
+- 同一切面的 Around 比 After、Before 先执行。
+
+
