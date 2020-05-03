@@ -8,10 +8,10 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 
 /**
- * Ê¾ÀýÀ´×ÔÓÚAQS´úÂë×¢ÊÍ¡£
- * ¹Ù·½ÎÄµµ
+ * Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½AQSï¿½ï¿½ï¿½ï¿½×¢ï¿½Í¡ï¿½
+ * ï¿½Ù·ï¿½ï¿½Äµï¿½
  *
- * @author chenglong.yu@brgroup.com
+ * @author chenglong.yu
  * created on 2020/6/21
  */
 public class PrayerMutex implements Lock {

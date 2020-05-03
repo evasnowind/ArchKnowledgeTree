@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * @author chenglong.yu@100credit.com
+ * @author chenglong.yu
  * created on 2020/5/22
  */
 public class T04_TestReentrantLock04_FairLock {

@@ -3,14 +3,14 @@ package com.prayerlaputa.juc.part5_threadpool.interview.printA1B2C3;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * @author chenglong.yu@100credit.com
+ * @author chenglong.yu
  * created on 2020/5/27
  */
 public class T04_AtomicInteger {
 
     /**
-     * ×¢Òâ´Ë´¦²»ÓÃ¼Óvolatile
-     * AtomicInteger×Ô¼ºÒÑ¾­ÊÇÏß³Ì°²È«
+     * ×¢ï¿½ï¿½Ë´ï¿½ï¿½ï¿½ï¿½Ã¼ï¿½volatile
+     * AtomicIntegerï¿½Ô¼ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ß³Ì°ï¿½È«
      */
     private static AtomicInteger counter = new AtomicInteger();
 

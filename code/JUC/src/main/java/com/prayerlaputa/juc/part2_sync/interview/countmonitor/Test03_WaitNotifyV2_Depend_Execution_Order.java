@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * @author chenglong.yu@100credit.com
+ * @author chenglong.yu
  * created on 2020/6/9
  */
 public class Test03_WaitNotifyV2_Depend_Execution_Order {

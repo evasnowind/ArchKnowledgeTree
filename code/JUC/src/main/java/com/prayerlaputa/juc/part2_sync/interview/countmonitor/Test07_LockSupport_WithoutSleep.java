@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.concurrent.locks.LockSupport;
 
 /**
- * @author chenglong.yu@100credit.com
+ * @author chenglong.yu
  * created on 2020/5/16
  */
 public class Test07_LockSupport_WithoutSleep {
@@ -30,7 +30,7 @@ public class Test07_LockSupport_WithoutSleep {
         Test07_LockSupport_WithoutSleep test = new Test07_LockSupport_WithoutSleep();
 
         t1 = new Thread(() -> {
-            System.out.println("t1Æô¶¯");
+            System.out.println("t1ï¿½ï¿½ï¿½ï¿½");
             for (int i = 0; i < 10; i++) {
                 test.add(new Object());
                 System.out.println("add " + i);
@@ -38,8 +38,8 @@ public class Test07_LockSupport_WithoutSleep {
                 if (test.size() == 5) {
                     LockSupport.unpark(t2);
                     /*
-                    ´Ë´¦t1±ØÐëpark£¬ÒòÎªt1²»ÔÝÍ£Ò»ÏÂ£¬½«µ¼ÖÂt2Ö´ÐÐÊ±¼ä²»¿É¿Ø£¬
-                    ÒòÎªCPUÊ±¼ä±»t1Õ¼ÓÃÖÐ
+                    ï¿½Ë´ï¿½t1ï¿½ï¿½ï¿½ï¿½parkï¿½ï¿½ï¿½ï¿½Îªt1ï¿½ï¿½ï¿½ï¿½Í£Ò»ï¿½Â£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½t2Ö´ï¿½ï¿½Ê±ï¿½ä²»ï¿½É¿Ø£ï¿½
+                    ï¿½ï¿½ÎªCPUÊ±ï¿½ä±»t1Õ¼ï¿½ï¿½ï¿½ï¿½
                      */
                     LockSupport.park();
                 }
@@ -47,11 +47,11 @@ public class Test07_LockSupport_WithoutSleep {
         }, "t1");
 
         t2 = new Thread(() -> {
-            System.out.println("t2Æô¶¯");
+            System.out.println("t2ï¿½ï¿½ï¿½ï¿½");
             //if (c.size() != 5) {
             LockSupport.park();
             //}
-            System.out.println("t2 ½áÊø");
+            System.out.println("t2 ï¿½ï¿½ï¿½ï¿½");
             LockSupport.unpark(t1);
         }, "t2");
 

@@ -4,7 +4,7 @@ package com.prayerlaputa.juc.optimize;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author chenglong.yu@100credit.com
+ * @author chenglong.yu
  * created on 2020/5/4
  */
 public class TestChangeSyncObj {

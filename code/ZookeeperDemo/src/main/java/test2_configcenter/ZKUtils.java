@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 
 /**
- * @author chenglong.yu@brgroup.com
+ * @author chenglong.yu
  * created on 2020/7/5
  */
 public class ZKUtils {

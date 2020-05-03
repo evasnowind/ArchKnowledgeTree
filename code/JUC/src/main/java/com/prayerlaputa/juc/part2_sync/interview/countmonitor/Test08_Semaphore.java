@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 
 /**
- * @author chenglong.yu@100credit.com
+ * @author chenglong.yu
  * created on 2020/5/16
  */
 public class Test08_Semaphore {
@@ -44,9 +44,9 @@ public class Test08_Semaphore {
 
             try {
                 /*
-                ÕâÖÖÀûÓÃÐÅºÅÁ¿µÄ½â·¨£¬Êµ¼ÊÉÏ¸úÌâÄ¿ÒªÇóÓÐÐ©Ïàã££¬ÒòÎªÕâÀïÖ»ÊÇÅÐ¶Ï=5£¬ÄÇÈç¹û»»¸öÌõ¼þ
-                Ñ­»·¾Í²»ºÃËµÁË¡£´Ë´¦Ö»ÊÇÎªÁËÕ¹Ê¾ÏÂÐÅºÅÁ¿Ð´·¨¡£
-                ÎªÁË±£Ö¤t1ÏÈÖ´ÐÐ£¬t2ÔÚt1Ö´ÐÐºó²Å¿ªÊ¼start
+                ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Åºï¿½ï¿½ï¿½ï¿½Ä½â·¨ï¿½ï¿½Êµï¿½ï¿½ï¿½Ï¸ï¿½ï¿½ï¿½Ä¿Òªï¿½ï¿½ï¿½ï¿½Ð©ï¿½ï¿½ã££ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½Ö»ï¿½ï¿½ï¿½Ð¶ï¿½=5ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                Ñ­ï¿½ï¿½ï¿½Í²ï¿½ï¿½ï¿½Ëµï¿½Ë¡ï¿½ï¿½Ë´ï¿½Ö»ï¿½ï¿½Îªï¿½ï¿½Õ¹Ê¾ï¿½ï¿½ï¿½Åºï¿½ï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½
+                Îªï¿½Ë±ï¿½Ö¤t1ï¿½ï¿½Ö´ï¿½Ð£ï¿½t2ï¿½ï¿½t1Ö´ï¿½Ðºï¿½Å¿ï¿½Ê¼start
                  */
                 t2.start();
                 t2.join();
@@ -69,7 +69,7 @@ public class Test08_Semaphore {
         t2 = new Thread(() -> {
             try {
                 s.acquire();
-                System.out.println("t2 ½áÊø");
+                System.out.println("t2 ï¿½ï¿½ï¿½ï¿½");
                 s.release();
             } catch (InterruptedException e) {
                 e.printStackTrace();

@@ -3,7 +3,7 @@ package com.prayerlaputa.juc.part2_sync.interview.blockqueue;
 import java.util.LinkedList;
 
 /**
- * @author chenglong.yu@100credit.com
+ * @author chenglong.yu
  * created on 2020/5/18
  */
 public class Test01<T> {
@@ -13,7 +13,7 @@ public class Test01<T> {
     private int MAX_CAPACITY = 10;
 
     /**
-     * ×¢Òâ£ºÐèÒª¼Óvolatile£¬ÒÔ±ã±£Ö¤¿É¼ûÐÔ
+     * ×¢ï¿½â£ºï¿½ï¿½Òªï¿½ï¿½volatileï¿½ï¿½ï¿½Ô±ã±£Ö¤ï¿½É¼ï¿½ï¿½ï¿½
      */
     private volatile int count = 0;
 
@@ -60,7 +60,7 @@ public class Test01<T> {
             Thread t = new Thread(() -> {
                 for (int j = 0; j < 10; j++) {
                     test01.put(j);
-                    System.out.println("Éú²ú£º" + tmp + " " + j + " count=" + test01.getCount());
+                    System.out.println("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½" + tmp + " " + j + " count=" + test01.getCount());
                 }
             }
             );
@@ -76,7 +76,7 @@ public class Test01<T> {
         for (int i = 0; i < 2; i++) {
             new Thread(() ->{
                 for(int j = 0; j < 50; j++) {
-                    System.out.println("Ïû·Ñ£º" + test01.get() + " count=" + test01.getCount());
+                    System.out.println("ï¿½ï¿½ï¿½Ñ£ï¿½" + test01.get() + " count=" + test01.getCount());
                 }
 
             }).start();

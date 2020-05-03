@@ -6,18 +6,18 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author chenglong.yu@100credit.com
+ * @author chenglong.yu
  * created on 2020/5/15
  */
 public class Test02_WithVolatile {
 
     /**
-     * volatile的使用务必谨慎，不要轻易用。volatile修饰的变量，尽量是基本类型，不要修饰类似List这种引用类型，因为List内部变化、对象本身
-     * 没有变化，volatile可能就观测不到。更严谨的说法：
-     *      volatile关键字对于基本类型的修改可以在随后对多个线程的读保持一致，但是对于引用类型如数组，实体bean，仅仅保证引用的可见性，但并不保证引用内容的可见性。
-     *      参考 https://blog.csdn.net/u010454030/article/details/80800098
+     * volatile锟斤拷使锟斤拷锟斤拷亟锟斤拷锟斤拷锟斤拷锟揭拷锟斤拷锟斤拷谩锟絭olatile锟斤拷锟轿的憋拷锟斤拷锟斤拷锟斤拷锟斤拷锟角伙拷锟斤拷锟斤拷锟酵ｏ拷锟斤拷要锟斤拷锟斤拷锟斤拷锟斤拷List锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟酵ｏ拷锟斤拷为List锟节诧拷锟戒化锟斤拷锟斤拷锟斤拷锟斤拷
+     * 没锟叫变化锟斤拷volatile锟斤拷锟杰就观测不锟斤拷锟斤拷锟斤拷锟较斤拷锟斤拷说锟斤拷锟斤拷
+     *      volatile锟截硷拷锟街讹拷锟节伙拷锟斤拷锟斤拷锟酵碉拷锟睫改匡拷锟斤拷锟斤拷锟斤拷锟皆讹拷锟斤拷叱痰亩锟斤拷锟斤拷锟揭伙拷拢锟斤拷锟斤拷嵌锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷椋碉拷锟絙ean锟斤拷锟斤拷锟斤拷锟斤拷证锟斤拷锟矫的可硷拷锟皆ｏ拷锟斤拷锟斤拷锟斤拷锟斤拷证锟斤拷锟斤拷锟斤拷锟捷的可硷拷锟皆★拷
+     *      锟轿匡拷 https://blog.csdn.net/u010454030/article/details/80800098
      *
-     * 参考https://blog.csdn.net/weixin_42008012/article/details/104673153
+     * 锟轿匡拷https://blog.csdn.net/weixin_42008012/article/details/104673153
      *
      */
     volatile List list = new LinkedList();
@@ -42,16 +42,16 @@ public class Test02_WithVolatile {
 
                         //
                         /*
-                        如果不sleep，test的变化就无法及时通知到t2线程。
-                        原因应该是这样：
-                        如果不sleep，线程t1、t2就都处于running状态，两者争抢CPU资源。
-                        那么就无法保证，t1每循环一次后，t2立马执行、观察状态，也就不能及时执行、退出。
-                        可能t1执行到5，t2刚好执行、看到队列是5、t2正要打印，结果t1又开始执行，。。。
-                        所以不sleep的情况下，输出顺序不确定，甚至t2可能永远结束不了。
-                        ——以上仅是个人推测，没去看源码，不敢肯定。
+                        锟斤拷锟斤拷锟絪leep锟斤拷test锟侥变化锟斤拷锟睫凤拷锟斤拷时通知锟斤拷t2锟竭程★拷
+                        原锟斤拷应锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷
+                        锟斤拷锟斤拷锟絪leep锟斤拷锟竭筹拷t1锟斤拷t2锟酵讹拷锟斤拷锟斤拷running状态锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷CPU锟斤拷源锟斤拷
+                        锟斤拷么锟斤拷锟睫凤拷锟斤拷证锟斤拷t1每循锟斤拷一锟轿猴拷t2锟斤拷锟斤拷执锟叫★拷锟桔诧拷状态锟斤拷也锟酵诧拷锟杰硷拷时执锟叫★拷锟剿筹拷锟斤拷
+                        锟斤拷锟斤拷t1执锟叫碉拷5锟斤拷t2锟秸猴拷执锟叫★拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷5锟斤拷t2锟斤拷要锟斤拷印锟斤拷锟斤拷锟絫1锟街匡拷始执锟叫ｏ拷锟斤拷锟斤拷锟斤拷
+                        锟斤拷锟皆诧拷sleep锟斤拷锟斤拷锟斤拷拢锟斤拷锟斤拷顺锟斤拷确锟斤拷锟斤拷锟斤拷锟斤拷t2锟斤拷锟斤拷锟斤拷远锟斤拷锟斤拷锟斤拷锟剿★拷
+                        锟斤拷锟斤拷锟斤拷锟较斤拷锟角革拷锟斤拷锟狡测，没去锟斤拷源锟诫，锟斤拷锟揭肯讹拷锟斤拷
 
-                        sleep一下，哪怕是很短时间，则可以保证t2能观察到t1状态。并且无论list是不是加锁的数据结构（如Collections.synchronizedList），都可以
-                        保证程序正常执行
+                        sleep一锟铰ｏ拷锟斤拷锟斤拷锟角很讹拷时锟戒，锟斤拷锟斤拷员锟街2锟杰观察到t1状态锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷list锟角诧拷锟角硷拷锟斤拷锟斤拷锟斤拷锟捷结构锟斤拷锟斤拷Collections.synchronizedList锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷
+                        锟斤拷证锟斤拷锟斤拷锟斤拷锟斤拷执锟斤拷
                          */
                         try {
 //                            TimeUnit.SECONDS.sleep(1);
@@ -69,7 +69,7 @@ public class Test02_WithVolatile {
                     break;
                 }
             }
-            System.out.println("t2 结束");
+            System.out.println("t2 锟斤拷锟斤拷");
         }, "t2").start();
     }
 }

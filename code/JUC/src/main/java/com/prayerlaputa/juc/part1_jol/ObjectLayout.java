@@ -6,7 +6,7 @@ import sun.misc.Contended;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * @author chenglong.yu@100credit.com
+ * @author chenglong.yu
  * created on 2020/5/2
  */
 public class ObjectLayout {

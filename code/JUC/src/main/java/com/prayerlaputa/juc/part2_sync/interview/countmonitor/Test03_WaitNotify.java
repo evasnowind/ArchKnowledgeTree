@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author chenglong.yu@100credit.com
+ * @author chenglong.yu
  * created on 2020/5/15
  */
 public class Test03_WaitNotify {
@@ -30,19 +30,19 @@ public class Test03_WaitNotify {
 
         new Thread(() -> {
             synchronized (lock) {
-                System.out.println("t2 ¿ªÊ¼");
+                System.out.println("t2 ï¿½ï¿½Ê¼");
                 if (test.size() != 5) {
                     try {
                         lock.wait();
-                        System.out.println("t2Ö´ÐÐ£¬¶ÓÁÐsize=5");
+                        System.out.println("t2Ö´ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½size=5");
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
-                System.out.println("t2 ½áÊø");
+                System.out.println("t2 ï¿½ï¿½ï¿½ï¿½");
 
                 /*
-                ´ËÊ±t1Ïß³Ì»¹ÔÚwait£¬ÐèÒª»½ÐÑ
+                ï¿½ï¿½Ê±t1ï¿½ß³Ì»ï¿½ï¿½ï¿½waitï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½
                  */
                 lock.notify();
             }
@@ -51,14 +51,14 @@ public class Test03_WaitNotify {
 
         new Thread(
                 () -> {
-                    System.out.println("t1Æô¶¯");
+                    System.out.println("t1ï¿½ï¿½ï¿½ï¿½");
                     synchronized (lock) {
                         for (int i = 0; i < 10; i++) {
                             test.add(i);
                             System.out.println("add " + i);
 
                         /*
-                        µ÷ÓÃwait/notify Ö®Ç°±ØÐë¼ÓÉÏsynchronized£¬·ñÔò½«±¨ÈçÏÂÒì³£
+                        ï¿½ï¿½ï¿½ï¿½wait/notify Ö®Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½synchronizedï¿½ï¿½ï¿½ï¿½ï¿½ò½«±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ì³£
                         Exception in thread "t1" java.lang.IllegalMonitorStateException
 	at java.lang.Object.notify(Native Method)
 	at com.prayerlaputa.juc.part2_sync.interview.countmonitor.Test03_WaitNotify.lambda$main$1(Test03_WaitNotify.java:51)
@@ -66,12 +66,12 @@ public class Test03_WaitNotify {
 
                          */
                             if (test.size() == 5) {
-                                //ÓÉÓÚnotify²¢Ã»ÓÐÊÍ·ÅlockËø£¬ÔÚnotiÖ®ºó£¬µ±Ç°Ïß³ÌÈÔÔÚÔËÐÐ£¬ÈÔÄÃ×ÅlockËø£¬Òò´ËÎÞ·¨ÇÐ»»µ½Ïß³Ì2
+                                //ï¿½ï¿½ï¿½ï¿½notifyï¿½ï¿½Ã»ï¿½ï¿½ï¿½Í·ï¿½lockï¿½ï¿½ï¿½ï¿½ï¿½ï¿½notiÖ®ï¿½ó£¬µï¿½Ç°ï¿½ß³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½lockï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Þ·ï¿½ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ß³ï¿½2
                                 lock.notify();
 
                                 try {
                                     /*
-                                    ´Ë´¦Í¨¹ýlock.wait×èÈûµ±Ç°Ïß³Ì£¬ÊÍ·ÅËø£¬¼ÓÈëµ½µ÷¶È¶ÓÁÐÖÐ£¬ÈÃ³öCPU£¬Ê¹µÃt2Ïß³ÌÓÐ»ú»áÖ´ÐÐ
+                                    ï¿½Ë´ï¿½Í¨ï¿½ï¿½lock.waitï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ß³Ì£ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ëµ½ï¿½ï¿½ï¿½È¶ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½Ã³ï¿½CPUï¿½ï¿½Ê¹ï¿½ï¿½t2ï¿½ß³ï¿½ï¿½Ð»ï¿½ï¿½ï¿½Ö´ï¿½ï¿½
                                      */
                                     lock.wait();
                                 } catch (InterruptedException e) {
@@ -87,7 +87,7 @@ public class Test03_WaitNotify {
                         }
                     }
 
-                    System.out.println("t1½áÊø");
+                    System.out.println("t1ï¿½ï¿½ï¿½ï¿½");
                 }
                 , "t1").start();
     }

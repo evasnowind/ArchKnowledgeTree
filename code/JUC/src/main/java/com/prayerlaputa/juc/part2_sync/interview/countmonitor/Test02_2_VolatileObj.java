@@ -1,7 +1,7 @@
 package com.prayerlaputa.juc.part2_sync.interview.countmonitor;
 
 /**
- * @author chenglong.yu@100credit.com
+ * @author chenglong.yu
  * created on 2020/6/8
  */
 public class Test02_2_VolatileObj {

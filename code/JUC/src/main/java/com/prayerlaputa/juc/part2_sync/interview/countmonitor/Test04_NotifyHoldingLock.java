@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author chenglong.yu@100credit.com
+ * @author chenglong.yu
  * created on 2020/5/15
  */
 public class Test04_NotifyHoldingLock {
@@ -30,7 +30,7 @@ public class Test04_NotifyHoldingLock {
 
         new Thread(() -> {
             synchronized (lock) {
-                System.out.println("t2 ¿ªÊ¼");
+                System.out.println("t2 ï¿½ï¿½Ê¼");
                 if (test.size() != 5) {
                     try {
                         lock.wait();
@@ -38,21 +38,21 @@ public class Test04_NotifyHoldingLock {
                         e.printStackTrace();
                     }
                 }
-                System.out.println("t2 ½áÊø");
+                System.out.println("t2 ï¿½ï¿½ï¿½ï¿½");
             }
         }, "t2").start();
 
 
         new Thread(
                 () -> {
-                    System.out.println("t1Æô¶¯");
+                    System.out.println("t1ï¿½ï¿½ï¿½ï¿½");
                     synchronized (lock) {
                         for (int i = 0; i < 10; i++) {
                             test.add(i);
                             System.out.println("add " + i);
 
                             if (test.size() == 5) {
-                                //ÓÉÓÚnotify²¢Ã»ÓÐÊÍ·ÅlockËø£¬µ±Ç°Ïß³ÌÈÔÔÚÔËÐÐ£¬ÈÔÄÃ×ÅlockËø£¬Òò´ËÎÞ·¨ÇÐ»»µ½Ïß³Ì2£¬ÎÞ·¨µ½´ïÄ¿µÄ
+                                //ï¿½ï¿½ï¿½ï¿½notifyï¿½ï¿½Ã»ï¿½ï¿½ï¿½Í·ï¿½lockï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ß³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½lockï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Þ·ï¿½ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ß³ï¿½2ï¿½ï¿½ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½
                                 lock.notify();
                             }
 
@@ -64,7 +64,7 @@ public class Test04_NotifyHoldingLock {
                         }
                     }
 
-                    System.out.println("t1½áÊø");
+                    System.out.println("t1ï¿½ï¿½ï¿½ï¿½");
                 }
                 , "t1").start();
     }

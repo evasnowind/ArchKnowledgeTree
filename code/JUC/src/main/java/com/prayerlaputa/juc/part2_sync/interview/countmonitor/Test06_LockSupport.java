@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
 /**
- * @author chenglong.yu@100credit.com
+ * @author chenglong.yu
  * created on 2020/5/16
  */
 public class Test06_LockSupport {
@@ -30,15 +30,15 @@ public class Test06_LockSupport {
 
         Thread t1 = null;
         Thread t2 = new Thread(() -> {
-            System.out.println("t2 执行");
+            System.out.println("t2 执锟斤拷");
             if (test.size() != 5) {
                 LockSupport.park();
             }
-            System.out.println("t2 结束");
+            System.out.println("t2 锟斤拷锟斤拷");
 //            LockSupport.unpark(t1);
         }, "t2");
         t2.start();
-        //此处t2先执行很重要
+        //锟剿达拷t2锟斤拷执锟叫猴拷锟斤拷要
 
         t1 = new Thread(
                 () -> {
@@ -51,10 +51,10 @@ public class Test06_LockSupport {
                         }
 
                         /*
-                        若不休眠，t1将继续占用CPU时间，t2无法获得CPU时间，无法执行。
-                        最终执行结果就是t2虽然已经拿到了锁，但只有t1稍微让出点时间，t2才能打印输出“t2执行”，
-                        这个执行时间不一定，可能是t1执行完才继续执行t2，也可能是t1指定到第8个，...。所以这种做法还是没有
-                        达到预期，因为没有精确在第5个时准备执行。
+                        锟斤拷锟斤拷锟斤拷锟竭ｏ拷t1锟斤拷锟斤拷锟斤拷占锟斤拷CPU时锟戒，t2锟睫凤拷锟斤拷锟紺PU时锟戒，锟睫凤拷执锟叫★拷
+                        锟斤拷锟斤拷执锟叫斤拷锟斤拷锟斤拷锟絫2锟斤拷然锟窖撅拷锟矫碉拷锟斤拷锟斤拷锟斤拷锟斤拷只锟斤拷t1锟斤拷微锟矫筹拷锟斤拷时锟戒，t2锟斤拷锟杰达拷印锟斤拷锟斤拷锟絫2执锟叫★拷锟斤拷
+                        锟斤拷锟街达拷锟绞憋拷洳灰伙拷锟斤拷锟斤拷锟斤拷锟斤拷锟絫1执锟斤拷锟斤拷偶锟斤拷锟街达拷锟絫2锟斤拷也锟斤拷锟斤拷锟斤拷t1指锟斤拷锟斤拷锟斤拷8锟斤拷锟斤拷...锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷没锟斤拷
+                        锟斤到预锟节ｏ拷锟斤拷为没锟叫撅拷确锟节碉拷5锟斤拷时准锟斤拷执锟叫★拷
                          */
 //                        try {
 ////                            TimeUnit.SECONDS.sleep(1);

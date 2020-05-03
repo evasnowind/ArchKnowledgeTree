@@ -4,7 +4,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 /**
- * @author chenglong.yu@100credit.com
+ * @author chenglong.yu
  * created on 2020/5/27
  */
 public class T03_BlockingQueue {
@@ -17,11 +17,11 @@ public class T03_BlockingQueue {
         char[] numArr = "123456".toCharArray();
 
         /**
-         * Êµ¼ÊÉÏÕâÀïÓÃ×èÈû¶ÓÁÐºÍÓÃLockSupport.park unparkÔ­ÀíÊÇÒ»ÑùµÄ
-         * ×¢Òâ²»ÒªÁ½±ßÉÏÀ´¶¼take£¬·ñÔò½«µ¼ÖÂÁ½¸öÏß³Ì¶¼±»×èÈû
+         * Êµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ðºï¿½ï¿½ï¿½LockSupport.park unparkÔ­ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½
+         * ×¢ï¿½â²»Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½takeï¿½ï¿½ï¿½ï¿½ï¿½ò½«µï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß³Ì¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
          *
-         * ÁíÍâ£¬Ò»¶¨Òª¼Ç×¡£¬¶ÔÓÚÊµÏÖÁËBlockingQueueµÄÀà£¬offer/poll ÊÇ·Ç×èÈûµÄ£¬
-         * put/takeÊÇ×èÈûµÄ¡£
+         * ï¿½ï¿½ï¿½â£¬Ò»ï¿½ï¿½Òªï¿½ï¿½×¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½BlockingQueueï¿½ï¿½ï¿½à£¬offer/poll ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½
+         * put/takeï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¡ï¿½
          *
          */
         new Thread(() -> {

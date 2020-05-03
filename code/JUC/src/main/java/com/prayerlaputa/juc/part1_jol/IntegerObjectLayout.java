@@ -5,7 +5,7 @@ import org.openjdk.jol.info.ClassLayout;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author chenglong.yu@brgroup.com
+ * @author chenglong.yu
  * created on 2020/6/20
  */
 public class IntegerObjectLayout {

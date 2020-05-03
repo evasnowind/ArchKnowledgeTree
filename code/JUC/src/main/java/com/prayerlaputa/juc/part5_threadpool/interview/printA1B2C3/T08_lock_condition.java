@@ -4,7 +4,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * @author chenglong.yu@100credit.com
+ * @author chenglong.yu
  * created on 2020/5/28
  */
 public class T08_lock_condition {
@@ -21,9 +21,9 @@ public class T08_lock_condition {
         Condition condition = lock.newCondition();
 
         /**
-         * ±¾´úÂëµÄÊµÏÖ£¬Êµ¼ÊÉÏÓëT06_sync_wait_notify_ver2ÊÇÒ»ÑùµÄ£¬Ö»²»¹ýÊ¹ÓÃµÄËø
-         * ´Ósynchronized/wait/notify»»³ÉÁËReentrantLock/Condition¡£
-         * ×¢ÒâConditionÊ¹ÓÃÊ±ÐèÒªÓÃsignal/await·½·¨£¬¶ø²»ÊÇwait/notify
+         * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½Ö£ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½T06_sync_wait_notify_ver2ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Ä£ï¿½Ö»ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½Ãµï¿½ï¿½ï¿½
+         * ï¿½ï¿½synchronized/wait/notifyï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ReentrantLock/Conditionï¿½ï¿½
+         * ×¢ï¿½ï¿½ConditionÊ¹ï¿½ï¿½Ê±ï¿½ï¿½Òªï¿½ï¿½signal/awaitï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½wait/notify
          */
         Thread t1 = new Thread(() -> {
             try {
@@ -32,7 +32,7 @@ public class T08_lock_condition {
                 for (char c : abcArr) {
                     System.out.print(c);
                     charThreadStart = true;
-                    //×¢Òâ´Ë´¦²»ÄÜsleep£¬sleep²»»áÊÍ·ÅËø£¡
+                    //×¢ï¿½ï¿½Ë´ï¿½ï¿½ï¿½ï¿½ï¿½sleepï¿½ï¿½sleepï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½ï¿½
                     condition.signal();
                     condition.await();
                 }

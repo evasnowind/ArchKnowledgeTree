@@ -4,7 +4,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * @author chenglong.yu@100credit.com
+ * @author chenglong.yu
  * created on 2020/5/28
  */
 public class T09_lock_condition_ver2 {
@@ -27,7 +27,7 @@ public class T09_lock_condition_ver2 {
 
                 for (char c : abcArr) {
                     System.out.print(c);
-                    //×¢Òâ´Ë´¦²»ÄÜsleep£¬sleep²»»áÊÍ·ÅËø£¡
+                    //×¢ï¿½ï¿½Ë´ï¿½ï¿½ï¿½ï¿½ï¿½sleepï¿½ï¿½sleepï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½ï¿½
                     numCondition.signal();
                     charCondition.await();
                 }
@@ -57,12 +57,12 @@ public class T09_lock_condition_ver2 {
         }, "t2");
 
         /**
-         * ×¢Òâ£¬ÓÉÓÚConditionµÄawait/signal²Ù×÷£¬²¢²»ÏñLockSupport.park/unparkÄÇÑù²»ÓÃ¿¼ÂÇµ÷ÓÃÏÈºó£¬
-         * ±ØÐëÊÇawaitÔÚÏÈ¡¢È»ºóÔÙµ÷ÓÃsignal¡£Õâ¸öÏÞÖÆµ¼ÖÂÈç¹ûÏëÓÃConditionËø×¡Ïß³Ì¡¢±£Ö¤Ë³ÐòÊ±£¬Ïß³ÌÆô¶¯
-         * Òª±£Ö¤Ò»¶¨Ë³Ðò¡£±ÈÈçËµ£¬Èç¹ûÉÏÃæµÄÐ´·¨£¬t1ÏÈÖ´ÐÐ£¬½«»áÒ»Ö±ËÀËø£¬ÒòÎªt1ÔÚnumCondition.awaitÊ±£¬t2µÄ
-         * numCondition.signalÒÑÖ´ÐÐ¡£
-         * ÏÈÖ´ÐÐt2£¬Ôò½«»áÊÇt2ÏÈÖ´ÐÐ¡¢±»numCondition.await()Ëø×¡£¬È»ºót1Ö´ÐÐ¡¢Êä³ö×ÖÄ¸¡¢numCondition.signalÊ¹µÃt2¿ÉÒÔÖ´ÐÐ£¬
-         * È»ºót1±»charCondition.awaitËø×¡¡£Èç´ËÍù¸´¡£
+         * ×¢ï¿½â£¬ï¿½ï¿½ï¿½ï¿½Conditionï¿½ï¿½await/signalï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½LockSupport.park/unparkï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½Çµï¿½ï¿½ï¿½ï¿½Èºï¿½
+         * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½awaitï¿½ï¿½ï¿½È¡ï¿½È»ï¿½ï¿½ï¿½Ùµï¿½ï¿½ï¿½signalï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Conditionï¿½ï¿½×¡ï¿½ß³Ì¡ï¿½ï¿½ï¿½Ö¤Ë³ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ß³ï¿½ï¿½ï¿½ï¿½ï¿½
+         * Òªï¿½ï¿½Ö¤Ò»ï¿½ï¿½Ë³ï¿½ò¡£±ï¿½ï¿½ï¿½Ëµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½t1ï¿½ï¿½Ö´ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½Ò»Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªt1ï¿½ï¿½numCondition.awaitÊ±ï¿½ï¿½t2ï¿½ï¿½
+         * numCondition.signalï¿½ï¿½Ö´ï¿½Ð¡ï¿½
+         * ï¿½ï¿½Ö´ï¿½ï¿½t2ï¿½ï¿½ï¿½ò½«»ï¿½ï¿½ï¿½t2ï¿½ï¿½Ö´ï¿½Ð¡ï¿½ï¿½ï¿½numCondition.await()ï¿½ï¿½×¡ï¿½ï¿½È»ï¿½ï¿½t1Ö´ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¸ï¿½ï¿½numCondition.signalÊ¹ï¿½ï¿½t2ï¿½ï¿½ï¿½ï¿½Ö´ï¿½Ð£ï¿½
+         * È»ï¿½ï¿½t1ï¿½ï¿½charCondition.awaitï¿½ï¿½×¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
          */
 //        t1.start();
         t2.start();

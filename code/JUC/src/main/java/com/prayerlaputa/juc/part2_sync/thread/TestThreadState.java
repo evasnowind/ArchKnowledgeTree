@@ -1,7 +1,7 @@
 package com.prayerlaputa.juc.part2_sync.thread;
 
 /**
- * @author chenglong.yu@100credit.com
+ * @author chenglong.yu
  * created on 2020/5/4
  */
 public class TestThreadState {

@@ -1,7 +1,7 @@
 package com.prayerlaputa.juc.part5_threadpool.interview.printA1B2C3;
 
 /**
- * @author chenglong.yu@100credit.com
+ * @author chenglong.yu
  * created on 2020/5/28
  */
 public class T06_sync_wait_notify_ver2 {
@@ -17,9 +17,9 @@ public class T06_sync_wait_notify_ver2 {
         char[] numArr = "123456".toCharArray();
 
         /**
-         * ÔÚµÚÒ»°æwait/notifyÊµÏÖÖÐ£¬ÒÀÀµÓÚÏß³ÌµÄÆô¶¯Ë³Ðò¡£
-         * ÏÂÃæÕâÖÖ·½Ê½¶Ô´Ë×öÁËÓÅ»¯£¬Í¨¹ýÒýÈë¶îÍâµÄÒ»¸övolatile±äÁ¿£¬
-         * ¿ØÖÆÏß³ÌÖ´ÐÐË³Ðò£¬²»¹ÜÄÄ¸öÏß³ÌÆô¶¯£¬ÏÈ¿ªÊ¼´òÓ¡µÄ¶¼ÊÇ´òÓ¡×ÖÄ¸µÄÏß³Ì¡£
+         * ï¿½Úµï¿½Ò»ï¿½ï¿½wait/notifyÊµï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß³Ìµï¿½ï¿½ï¿½ï¿½ï¿½Ë³ï¿½ï¿½
+         * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½Ê½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å»ï¿½ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½volatileï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+         * ï¿½ï¿½ï¿½ï¿½ï¿½ß³ï¿½Ö´ï¿½ï¿½Ë³ï¿½ò£¬²ï¿½ï¿½ï¿½ï¿½Ä¸ï¿½ï¿½ß³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¿ï¿½Ê¼ï¿½ï¿½Ó¡ï¿½Ä¶ï¿½ï¿½Ç´ï¿½Ó¡ï¿½ï¿½Ä¸ï¿½ï¿½ï¿½ß³Ì¡ï¿½
          */
         Thread t1 = new Thread(() -> {
             synchronized (object) {
@@ -27,7 +27,7 @@ public class T06_sync_wait_notify_ver2 {
                     System.out.print(c);
                     charThreadStart = true;
                     try {
-                        //×¢Òâ´Ë´¦²»ÄÜsleep£¬sleep²»»áÊÍ·ÅËø£¡
+                        //×¢ï¿½ï¿½Ë´ï¿½ï¿½ï¿½ï¿½ï¿½sleepï¿½ï¿½sleepï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½ï¿½
                         object.notify();
                         object.wait();
                     } catch (InterruptedException e) {

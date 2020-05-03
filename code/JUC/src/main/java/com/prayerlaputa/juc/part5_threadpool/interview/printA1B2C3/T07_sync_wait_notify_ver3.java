@@ -1,7 +1,7 @@
 package com.prayerlaputa.juc.part5_threadpool.interview.printA1B2C3;
 
 /**
- * @author chenglong.yu@100credit.com
+ * @author chenglong.yu
  * created on 2020/5/28
  */
 public class T07_sync_wait_notify_ver3 {
@@ -17,10 +17,10 @@ public class T07_sync_wait_notify_ver3 {
         char[] numArr = "123456".toCharArray();
 
         /**
-         * wait/notify £¨Condition.await/signalÒ²ÊÇÒ»ÑùµÄ£© ÎÞ·¨×öµ½ÏñLockSupport.park/unparkÄÇÑù£¬½öÍ¨¹ýµ÷Õû
-         * wait/notifyµÄÎ»ÖÃ¡¢²»ÒýÈë¶îÍâÂß¼­¾ÍÄÜ±£Ö¤ÈÎÒâÏß³ÌÆô¶¯Ë³Ðò¶¼ÄÜ°´ÒªÇó´òÓ¡¡£
-         * ¸ùÔ´ÔÚÓÚ£ºLockSupport.park/unpark²Ù×÷£¬park/unpark²»½²ÇóÏÈºóË³Ðò£¬ÏÈunpark£¬È»ºóÔÙpark£¬»òÊÇÏÈparkÔÙunpark¶¼¿ÉÒÔ¡£
-         * wait/notify £¨Condition.await/signalÒ²ÊÇÒ»ÑùµÄ£©Ôò±ØÐëÏÈwait(await)ÔÙnotify(signal)
+         * wait/notify ï¿½ï¿½Condition.await/signalÒ²ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Ä£ï¿½ ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½LockSupport.park/unparkï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+         * wait/notifyï¿½ï¿½Î»ï¿½Ã¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¼ï¿½ï¿½ï¿½ï¿½Ü±ï¿½Ö¤ï¿½ï¿½ï¿½ï¿½ï¿½ß³ï¿½ï¿½ï¿½ï¿½ï¿½Ë³ï¿½ï¿½ï¿½Ü°ï¿½Òªï¿½ï¿½ï¿½Ó¡ï¿½ï¿½
+         * ï¿½ï¿½Ô´ï¿½ï¿½ï¿½Ú£ï¿½LockSupport.park/unparkï¿½ï¿½ï¿½ï¿½ï¿½ï¿½park/unparkï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Èºï¿½Ë³ï¿½ï¿½ï¿½ï¿½unparkï¿½ï¿½È»ï¿½ï¿½ï¿½ï¿½parkï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½parkï¿½ï¿½unparkï¿½ï¿½ï¿½ï¿½ï¿½Ô¡ï¿½
+         * wait/notify ï¿½ï¿½Condition.await/signalÒ²ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½wait(await)ï¿½ï¿½notify(signal)
          *
          */
         Thread t1 = new Thread(() -> {
@@ -28,7 +28,7 @@ public class T07_sync_wait_notify_ver3 {
                 for (char c : abcArr) {
                     try {
                         System.out.print(c);
-                        //×¢Òâ´Ë´¦²»ÄÜsleep£¬sleep²»»áÊÍ·ÅËø£¡
+                        //×¢ï¿½ï¿½Ë´ï¿½ï¿½ï¿½ï¿½ï¿½sleepï¿½ï¿½sleepï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½ï¿½
                         object.notify();
                         object.wait();
                     } catch (InterruptedException e) {

@@ -3,7 +3,7 @@ package com.prayerlaputa.juc.part2_sync.thread;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author chenglong.yu@100credit.com
+ * @author chenglong.yu
  * created on 2020/5/1
  */
 public class TestThread {
