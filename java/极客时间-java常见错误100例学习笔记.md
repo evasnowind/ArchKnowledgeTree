@@ -827,3 +827,48 @@ Bean 默认是单例的，所以单例的 Controller 注入的 Service 也是一
 - 同一切面的 Around 比 After、Before 先执行。
 
 
+
+
+
+
+
+
+# 加餐4 | 分析定位Java问题，一定要用好这些工具（一）
+
+## 1. 使用 JDK 自带工具查看 JVM 情况
+
+### jps
+
+使用 jps 得到 Java 进程列表
+
+### jinfo
+
+打印 JVM 的各种参数
+
+### jvisualvm
+
+### jconsole
+
+看到各个内存区的 GC 曲线图
+
+
+### jstat
+
+如果没有条件使用图形界面（毕竟在 Linux 服务器上，我们主要使用命令行工具），又希望看到 GC 趋势的话，我们可以使用 jstat 工具。
+
+### jstack
+
+抓取线程栈
+
+### jcmd
+
+查看 NMT
+
+
+# 20 | Spring框架：框架帮我们做了很多工作也带来了复杂度
+## 1. Feign AOP 切不到的诡异案例
+
+虽然 LoadBalancerFeignClient 和 ApacheHttpClient 都是 feign.Client 接口的实现，但是 HttpClientFeignLoadBalancedConfiguration 的自动配置只是把前者定义为 Bean，后者是 new 出来的、作为了 LoadBalancerFeignClient 的 delegate，不是 Bean。
+
+Spring Boot 2.x 默认使用 CGLIB 的方式，但通过继承实现代理有个问题是，无法继承 final 的类。因为，ApacheHttpClient 类就是定义为了 final：
+
