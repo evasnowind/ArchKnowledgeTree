@@ -1,3 +1,7 @@
+import java.util.LinkedList;
+
+import javax.swing.tree.TreeNode;
+
 /*
  * @lc app=leetcode id=102 lang=java
  *
@@ -32,10 +36,10 @@ class Solution {
         queue.offer(root);
         
         while(!queue.isEmpty()) {
-            queue.offer(null);
+            int curLevelSize = queue.size();
             
             List<Integer> curLevel = new ArrayList<>();
-            while(null != queue.peek()) {
+            for(int i = 0; i < curLevelSize; i++) {
                 TreeNode curNode = queue.poll();
                 curLevel.add(curNode.val);
 
@@ -47,8 +51,6 @@ class Solution {
                 }
             }
             
-            queue.poll();    
-
             result.add(curLevel);
         }
 
