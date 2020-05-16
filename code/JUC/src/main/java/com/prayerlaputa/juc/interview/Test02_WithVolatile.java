@@ -1,6 +1,8 @@
 package com.prayerlaputa.juc.interview;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -8,9 +10,11 @@ import java.util.concurrent.TimeUnit;
  * @author chenglong.yu@100credit.com
  * created on 2020/5/15
  */
-public class Test01_NoVolatile {
+public class Test02_WithVolatile {
 
-    List list = new ArrayList();
+//    volatile List list = new LinkedList();
+
+    volatile List list = Collections.synchronizedList(new LinkedList<>());
 
     public void add(Object obj) {
         list.add(obj);
@@ -21,7 +25,7 @@ public class Test01_NoVolatile {
     }
 
     public static void main(String[] args) {
-        Test01_NoVolatile test = new Test01_NoVolatile();
+        Test02_WithVolatile test = new Test02_WithVolatile();
         new Thread(
                 () -> {
                     for (int i = 0; i < 10; i++) {
@@ -39,7 +43,6 @@ public class Test01_NoVolatile {
         , "t1").start();
 
         new Thread(() -> {
-            //多线程，没加volatile，t2线程根本看不到t1中的变化
             while(true) {
                 if (test.size() == 5) {
                     break;
