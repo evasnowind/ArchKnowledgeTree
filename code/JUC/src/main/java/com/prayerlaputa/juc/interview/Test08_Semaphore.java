@@ -8,7 +8,7 @@ import java.util.concurrent.locks.LockSupport;
  * @author chenglong.yu@100credit.com
  * created on 2020/5/16
  */
-public class Test07_Semaphore {
+public class Test08_Semaphore {
 
 
     volatile List list = new LinkedList();
@@ -28,7 +28,7 @@ public class Test07_Semaphore {
     static Thread t1 = null, t2 = null;
 
     public static void main(String[] args) {
-        Test07_Semaphore test = new Test07_Semaphore();
+        Test08_Semaphore test = new Test08_Semaphore();
 
         final Object lock = new Object();
 

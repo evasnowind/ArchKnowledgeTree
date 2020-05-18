@@ -1,6 +1,5 @@
 package com.prayerlaputa.juc.interview;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -9,7 +8,7 @@ import java.util.concurrent.TimeUnit;
  * @author chenglong.yu@100credit.com
  * created on 2020/5/15
  */
-public class Test03_WaitNotify {
+public class Test04_NotifyHoldingLock {
 
 
     volatile List list = new LinkedList();
@@ -25,7 +24,7 @@ public class Test03_WaitNotify {
     }
 
     public static void main(String[] args) {
-        Test03_WaitNotify test = new Test03_WaitNotify();
+        Test04_NotifyHoldingLock test = new Test04_NotifyHoldingLock();
 
         final Object lock = new Object();
 
