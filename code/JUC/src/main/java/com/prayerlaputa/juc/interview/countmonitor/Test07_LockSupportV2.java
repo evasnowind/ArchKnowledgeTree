@@ -1,10 +1,8 @@
-package com.prayerlaputa.juc.interview;
+package com.prayerlaputa.juc.interview.countmonitor;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
 
 /**
  * @author chenglong.yu@100credit.com

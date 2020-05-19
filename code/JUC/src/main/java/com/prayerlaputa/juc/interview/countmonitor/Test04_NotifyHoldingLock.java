@@ -1,4 +1,4 @@
-package com.prayerlaputa.juc.interview;
+package com.prayerlaputa.juc.interview.countmonitor;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -55,7 +55,7 @@ public class Test04_NotifyHoldingLock {
                         调用wait/notify 之前必须加上synchronized，否则将报如下异常
                         Exception in thread "t1" java.lang.IllegalMonitorStateException
 	at java.lang.Object.notify(Native Method)
-	at com.prayerlaputa.juc.interview.Test03_WaitNotify.lambda$main$1(Test03_WaitNotify.java:51)
+	at com.prayerlaputa.juc.interview.countmonitor.Test03_WaitNotify.lambda$main$1(Test03_WaitNotify.java:51)
 	at java.lang.Thread.run(Thread.java:748)
 
                          */

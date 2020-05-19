@@ -1,4 +1,4 @@
-package com.prayerlaputa.juc.interview;
+package com.prayerlaputa.juc.interview.countmonitor;
 
 import java.util.LinkedList;
 import java.util.List;
