@@ -1,4 +1,4 @@
-package com.prayerlaputa.juc.sync;
+package com.prayerlaputa.juc.atomic;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;

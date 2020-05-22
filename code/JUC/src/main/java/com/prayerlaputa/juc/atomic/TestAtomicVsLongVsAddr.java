@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.LongAdder;
  * @author chenglong.yu@100credit.com
  * created on 2020/5/5
  */
-public class AtomicVsLongVsAddr {
+public class TestAtomicVsLongVsAddr {
     static AtomicLong count1 = new AtomicLong(0L);
     static long count2 = 0L;
     static LongAdder count3 = new LongAdder();

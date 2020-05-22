@@ -1,4 +1,4 @@
-package com.prayerlaputa.juc.sync.reentrantlock.extendSynchronized;
+package com.prayerlaputa.juc.sync;
 
 import java.util.concurrent.TimeUnit;
 
@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
  * @author chenglong.yu@100credit.com
  * created on 2020/5/4
  */
-public class T {
+public class T05_TestSynchronizedExtend {
 
     synchronized void m1() {
         System.out.println("m1 start");
@@ -21,11 +21,11 @@ public class T {
     }
 
     public static void main(String[] args) {
-        new TT().m1();
+        new Child().m1();
     }
 }
 
-class TT extends T{
+class Child extends T05_TestSynchronizedExtend{
     @Override
     synchronized void m1() {
         System.out.println("child m start");
