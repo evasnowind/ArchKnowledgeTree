@@ -35,12 +35,13 @@ public class Test06_LockSupport {
         Thread t2 = new Thread(() -> {
             if (test.size() != 5) {
                 LockSupport.park();
-                System.out.println("t2 执行");
+                System.out.println("t2 ִ��");
             }
-            System.out.println("t2 结束");
+            System.out.println("t2 ����");
 //            LockSupport.unpark(t1);
         }, "t2");
         t2.start();
+        //�˴�t2��ִ�к���Ҫ
 
         t1 = new Thread(
                 () -> {
@@ -53,16 +54,16 @@ public class Test06_LockSupport {
                         }
 
                         /*
-                        若不休眠，t1将继续占用CPU时间，t2无法获得CPU时间，无法执行。
-                        最终执行结果就是t2虽然已经拿到了锁，但只有t1稍微让出点时间，t2才能打印输出“t2执行”，
-                        这个执行时间不一定，可能是t1执行完才继续执行t2，也可能是t1指定到第8个，...。所以这种做法还是没有
-                        达到预期，因为没有精确在第5个时准备执行。
+                        �������ߣ�t1������ռ��CPUʱ�䣬t2�޷����CPUʱ�䣬�޷�ִ�С�
+                        ����ִ�н������t2��Ȼ�Ѿ��õ���������ֻ��t1��΢�ó���ʱ�䣬t2���ܴ�ӡ�����t2ִ�С���
+                        ���ִ��ʱ�䲻һ����������t1ִ����ż���ִ��t2��Ҳ������t1ָ������8����...������������������û��
+                        �ﵽԤ�ڣ���Ϊû�о�ȷ�ڵ�5��ʱ׼��ִ�С�
                          */
-                        try {
-                            TimeUnit.SECONDS.sleep(1);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+//                        try {
+//                            TimeUnit.SECONDS.sleep(1);
+//                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+//                        }
 
                     }
 

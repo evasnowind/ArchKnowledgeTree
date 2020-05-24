@@ -13,10 +13,6 @@ public class Test08_Semaphore {
 
     volatile List list = new LinkedList();
 
-//    volatile List list = Collections.synchronizedList(new LinkedList<>());
-
-
-
     public void add(Object obj) {
         list.add(obj);
     }
