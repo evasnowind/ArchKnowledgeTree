@@ -2,31 +2,30 @@ package com.prayerlaputa.juc.part5_threadpool.interview.printA1B2C3;
 
 /**
  * @author chenglong.yu@100credit.com
- * created on 2020/5/27
+ * created on 2020/5/28
  */
-public class T05_sync_wait_notify {
+public class T06_sync_wait_notify_ver2 {
 
 
-    private static Object object = new Object();
+
+    private static volatile boolean charThreadStart = false;
 
     public static void main(String[] args) {
+        final Object object = new Object();
+
         char[] abcArr = "ABCDEF".toCharArray();
         char[] numArr = "123456".toCharArray();
 
         /**
-         * 采用wait/notify的方法，所依赖的是线程启动顺序。
-         * 线程内部输出语句倒是不用太留意。
-         * 哪个线程先启动，立马输出，然后通知另个线程可以运行了，然后将自己锁住；
-         * 另一个线程也是同样的逻辑：立马输出，然后通知，然后将自己锁住。
-         *
-         * 需要留意的是，由于是两个线程唤醒对方、然后自己睡眠，那么在最后有一个字符输出后，
-         * 必然有一个线程会处于wait状态，为此在任何一个线程的for循环结束后，额外加一个notify操作，
-         * 保证任何一个线程都不会卡死。
+         * 在第一版wait/notify实现中，依赖于线程的启动顺序。
+         * 下面这种方式对此做了优化，通过引入额外的一个volatile变量，
+         * 控制线程执行顺序，不管哪个线程启动，先开始打印的都是打印字母的线程。
          */
         Thread t1 = new Thread(() -> {
             synchronized (object) {
                 for (char c : abcArr) {
                     System.out.print(c);
+                    charThreadStart = true;
                     try {
                         //注意此处不能sleep，sleep不会释放锁！
                         object.notify();
@@ -40,7 +39,16 @@ public class T05_sync_wait_notify {
         }, "t1");
         Thread t2 = new Thread(() -> {
             synchronized (object) {
+                while (!charThreadStart) {
+                    try {
+                        object.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 for (char c : numArr) {
+                    charThreadStart = false;
                     try {
                         System.out.print(c);
                         object.notify();
@@ -56,5 +64,6 @@ public class T05_sync_wait_notify {
 
         t1.start();
         t2.start();
+//        t1.start();
     }
 }
