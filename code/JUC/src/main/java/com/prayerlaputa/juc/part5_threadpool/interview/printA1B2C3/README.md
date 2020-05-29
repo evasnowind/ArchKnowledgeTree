@@ -4,3 +4,4 @@
 
 实现难易程度：LockSupport cas BlockingQueque AtomicInteger sync-wait-notify lock-condition
 
+PipedStream/Exchanger/TransferQueue太过冷门，没细看，直接将马士兵老师的代码拷过来了。
