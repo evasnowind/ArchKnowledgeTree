@@ -12,6 +12,9 @@ public class Test01<T> {
 
     private int MAX_CAPACITY = 10;
 
+    /**
+     * ×¢Òâ£ºÐèÒª¼Óvolatile£¬ÒÔ±ã±£Ö¤¿É¼ûÐÔ
+     */
     private volatile int count = 0;
 
     public synchronized void put(T t) {
@@ -57,7 +60,7 @@ public class Test01<T> {
             Thread t = new Thread(() -> {
                 for (int j = 0; j < 10; j++) {
                     test01.put(j);
-                    System.out.println("ç”Ÿäº§ï¼š" + tmp + " " + j + " count=" + test01.getCount());
+                    System.out.println("Éú²ú£º" + tmp + " " + j + " count=" + test01.getCount());
                 }
             }
             );
@@ -73,7 +76,7 @@ public class Test01<T> {
         for (int i = 0; i < 2; i++) {
             new Thread(() ->{
                 for(int j = 0; j < 50; j++) {
-                    System.out.println("æ¶ˆè´¹ï¼š" + test01.get() + " count=" + test01.getCount());
+                    System.out.println("Ïû·Ñ£º" + test01.get() + " count=" + test01.getCount());
                 }
 
             }).start();
