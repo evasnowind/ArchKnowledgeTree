@@ -79,11 +79,11 @@ public class Test03_WaitNotify {
                                 }
                             }
 
-                            try {
-                                TimeUnit.SECONDS.sleep(1);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
+//                            try {
+//                                TimeUnit.SECONDS.sleep(1);
+//                            } catch (InterruptedException e) {
+//                                e.printStackTrace();
+//                            }
                         }
                     }
 

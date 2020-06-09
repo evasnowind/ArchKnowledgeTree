@@ -3,6 +3,7 @@ package com.prayerlaputa.juc.part2_sync.interview.countmonitor;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author chenglong.yu@100credit.com
@@ -10,9 +11,18 @@ import java.util.List;
  */
 public class Test02_WithVolatile {
 
-//    volatile List list = new LinkedList();
+    /**
+     * volatileµÄÊ¹ÓÃÎñ±Ø½÷É÷£¬²»ÒªÇáÒ×ÓÃ¡£volatileĞŞÊÎµÄ±äÁ¿£¬¾¡Á¿ÊÇ»ù±¾ÀàĞÍ£¬²»ÒªĞŞÊÎÀàËÆListÕâÖÖÒıÓÃÀàĞÍ£¬ÒòÎªListÄÚ²¿±ä»¯¡¢¶ÔÏó±¾Éí
+     * Ã»ÓĞ±ä»¯£¬volatile¿ÉÄÜ¾Í¹Û²â²»µ½¡£¸üÑÏ½÷µÄËµ·¨£º
+     *      volatile¹Ø¼ü×Ö¶ÔÓÚ»ù±¾ÀàĞÍµÄĞŞ¸Ä¿ÉÒÔÔÚËæºó¶Ô¶à¸öÏß³ÌµÄ¶Á±£³ÖÒ»ÖÂ£¬µ«ÊÇ¶ÔÓÚÒıÓÃÀàĞÍÈçÊı×é£¬ÊµÌåbean£¬½ö½ö±£Ö¤ÒıÓÃµÄ¿É¼ûĞÔ£¬µ«²¢²»±£Ö¤ÒıÓÃÄÚÈİµÄ¿É¼ûĞÔ¡£
+     *      ²Î¿¼ https://blog.csdn.net/u010454030/article/details/80800098
+     *
+     * ²Î¿¼https://blog.csdn.net/weixin_42008012/article/details/104673153
+     *
+     */
+    volatile List list = new LinkedList();
 
-    volatile List list = Collections.synchronizedList(new LinkedList<>());
+//    volatile List list = Collections.synchronizedList(new LinkedList<>());
 
     public void add(Object obj) {
         list.add(obj);
@@ -30,20 +40,26 @@ public class Test02_WithVolatile {
                         test.add(i);
                         System.out.println("add " + i);
 
-                        //å¦‚æœä¸sleepï¼Œtestçš„å˜åŒ–å°±æ— æ³•é€šçŸ¥åˆ°t2çº¿ç¨‹ã€‚åº”è¯¥æ˜¯sleepæ—¶æœ‰ä¸€äº›åŒæ­¥æ“ä½œ
+                        //
                         /*
-                        ç»“è®ºï¼š
-                        1ã€volatile æ²¡æœ‰æŠŠæ¡çš„è¯ä¸è¦è½»æ˜“ç”¨
-                        2ã€volatileä¿®é¥°çš„å˜é‡ï¼Œå°½é‡æ˜¯åŸºæœ¬ç±»å‹ï¼Œä¸è¦ä¿®é¥°ç±»ä¼¼Listè¿™ç§å¼•ç”¨ç±»å‹ï¼Œå› ä¸ºListå†…éƒ¨å˜åŒ–ã€å¯¹è±¡æœ¬èº«
-                        æ²¡æœ‰å˜åŒ–ï¼Œvolatileå¯èƒ½å°±è§‚æµ‹ä¸åˆ°
-                         */
-//                        try {
-//                            TimeUnit.SECONDS.sleep(1);
-//                        } catch (InterruptedException e) {
-//                            e.printStackTrace();
-//                        }
-                    }
+                        Èç¹û²»sleep£¬testµÄ±ä»¯¾ÍÎŞ·¨¼°Ê±Í¨Öªµ½t2Ïß³Ì¡£
+                        Ô­ÒòÓ¦¸ÃÊÇÕâÑù£º
+                        Èç¹û²»sleep£¬Ïß³Ìt1¡¢t2¾Í¶¼´¦ÓÚrunning×´Ì¬£¬Á½ÕßÕùÇÀCPU×ÊÔ´¡£
+                        ÄÇÃ´¾ÍÎŞ·¨±£Ö¤£¬t1Ã¿Ñ­»·Ò»´Îºó£¬t2Á¢ÂíÖ´ĞĞ¡¢¹Û²ì×´Ì¬£¬Ò²¾Í²»ÄÜ¼°Ê±Ö´ĞĞ¡¢ÍË³ö¡£
+                        ¿ÉÄÜt1Ö´ĞĞµ½5£¬t2¸ÕºÃÖ´ĞĞ¡¢¿´µ½¶ÓÁĞÊÇ5¡¢t2ÕıÒª´òÓ¡£¬½á¹ût1ÓÖ¿ªÊ¼Ö´ĞĞ£¬¡£¡£¡£
+                        ËùÒÔ²»sleepµÄÇé¿öÏÂ£¬Êä³öË³Ğò²»È·¶¨£¬ÉõÖÁt2¿ÉÄÜÓÀÔ¶½áÊø²»ÁË¡£
+                        ¡ª¡ªÒÔÉÏ½öÊÇ¸öÈËÍÆ²â£¬Ã»È¥¿´Ô´Âë£¬²»¸Ò¿Ï¶¨¡£
 
+                        sleepÒ»ÏÂ£¬ÄÄÅÂÊÇºÜ¶ÌÊ±¼ä£¬Ôò¿ÉÒÔ±£Ö¤t2ÄÜ¹Û²ìµ½t1×´Ì¬¡£²¢ÇÒÎŞÂÛlistÊÇ²»ÊÇ¼ÓËøµÄÊı¾İ½á¹¹£¨ÈçCollections.synchronizedList£©£¬¶¼¿ÉÒÔ
+                        ±£Ö¤³ÌĞòÕı³£Ö´ĞĞ
+                         */
+                        try {
+//                            TimeUnit.SECONDS.sleep(1);
+                            TimeUnit.NANOSECONDS.sleep(1);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
         , "t1").start();
 
@@ -53,7 +69,7 @@ public class Test02_WithVolatile {
                     break;
                 }
             }
-            System.out.println("t2 ç»“æŸ");
+            System.out.println("t2 ½áÊø");
         }, "t2").start();
     }
 }

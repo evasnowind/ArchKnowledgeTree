@@ -3,6 +3,7 @@ package com.prayerlaputa.juc.part2_sync.interview.countmonitor;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author chenglong.yu@100credit.com
@@ -30,18 +31,16 @@ public class Test05_CountDownLatch {
 
         CountDownLatch latch = new CountDownLatch(1);
 
-        final Object lock = new Object();
-
         new Thread(() -> {
             if (test.size() != 5) {
                 try {
                     latch.await();
-                    System.out.println("t2 执行");
+                    System.out.println("t2 ִ��");
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-            System.out.println("t2 结束");
+            System.out.println("t2 ����");
         }, "t2").start();
 
 
@@ -56,26 +55,25 @@ public class Test05_CountDownLatch {
                         }
 
                         /*
-                        若不休眠，只是countDown()一下，t1将继续占用CPU时间，t2无法获得CPU时间，无法执行。
-                        最终执行结果就是t2虽然已经拿到了latch的锁，但只有t1稍微让出点时间，t2才能打印输出“t2执行”，
-                        这个执行时间不一定，可能是t1执行完才继续执行t2，也可能是t1指定到第8个，...。所以这种做法还是没有
-                        达到预期，因为没有精确在第5个时准备执行。
-                        所以严格来讲，这种写法有问题。
-                        如果要保证在第5个时候，精确打印，需要用两个CountDownLatch，分别各自拦一下。和两个notify/wait
-                        配合是一样的道理。
+                        �������ߣ�ֻ��countDown()һ�£�t1������ռ��CPUʱ�䣬t2�޷����CPUʱ�䣬�޷�ִ�С�
+                        ����ִ�н������t2��Ȼ�Ѿ��õ���latch��������ֻ��t1��΢�ó���ʱ�䣬t2���ܴ�ӡ�����t2ִ�С���
+                        ���ִ��ʱ�䲻һ����������t1ִ����ż���ִ��t2��Ҳ������t1ָ������8����...������������������û��
+                        �ﵽԤ�ڣ���Ϊû�о�ȷ�ڵ�5��ʱ׼��ִ�С�
+                        �����ϸ�����������д�������⡣
+                        ���Ҫ��֤�ڵ�5��ʱ�򣬾�ȷ��ӡ����Ҫ������CountDownLatch���ֱ������һ�¡�������notify/wait
+                        �����һ���ĵ�����
 
-                        更简单的写法是用LockSupport.park/unpark
+                        ���򵥵�д������LockSupport.park/unpark
                          */
-//                        try {
+                        try {
 //                            TimeUnit.SECONDS.sleep(1);
-//                        } catch (InterruptedException e) {
-//                            e.printStackTrace();
-//                        }
+                            TimeUnit.NANOSECONDS.sleep(1);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
 
                 }
                 , "t1").start();
-
-
     }
 }
