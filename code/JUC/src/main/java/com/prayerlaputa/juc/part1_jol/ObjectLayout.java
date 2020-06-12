@@ -10,21 +10,21 @@ public class ObjectLayout {
 
     public static void main(String[] args) throws Exception {
 
-        Object o = new Object();
+//        Object o = new Object();
 
         //延迟5s，因为JVM 有个机制
         Thread.sleep(5000);
 
-//        Object o = new Object();
-
+        Object o = new Object();
         System.out.println(ClassLayout.parseInstance(o).toPrintable());
-
-        synchronized (o) {
-            System.out.println(ClassLayout.parseInstance(o).toPrintable());
-        }
 
         SimpleObject simpleObject = new SimpleObject();
         System.out.println(ClassLayout.parseInstance(simpleObject).toPrintable());
+
+
+//        synchronized (o) {
+//            System.out.println(ClassLayout.parseInstance(o).toPrintable());
+//        }
     }
 }
 
