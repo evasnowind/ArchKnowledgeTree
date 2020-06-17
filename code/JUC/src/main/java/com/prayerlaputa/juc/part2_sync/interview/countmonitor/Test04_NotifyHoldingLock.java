@@ -30,7 +30,7 @@ public class Test04_NotifyHoldingLock {
 
         new Thread(() -> {
             synchronized (lock) {
-                System.out.println("t2 å¼€å§‹");
+                System.out.println("t2 ¿ªÊ¼");
                 if (test.size() != 5) {
                     try {
                         lock.wait();
@@ -38,29 +38,21 @@ public class Test04_NotifyHoldingLock {
                         e.printStackTrace();
                     }
                 }
-                System.out.println("t2 ç»“æŸ");
+                System.out.println("t2 ½áÊø");
             }
         }, "t2").start();
 
 
         new Thread(
                 () -> {
-                    System.out.println("t1å¯åŠ¨");
+                    System.out.println("t1Æô¶¯");
                     synchronized (lock) {
                         for (int i = 0; i < 10; i++) {
                             test.add(i);
                             System.out.println("add " + i);
 
-                        /*
-                        è°ƒç”¨wait/notify ä¹‹å‰å¿…é¡»åŠ ä¸Šsynchronizedï¼Œå¦åˆ™å°†æŠ¥å¦‚ä¸‹å¼‚å¸¸
-                        Exception in thread "t1" java.lang.IllegalMonitorStateException
-	at java.lang.Object.notify(Native Method)
-	at com.prayerlaputa.juc.part2_sync.interview.countmonitor.Test03_WaitNotify.lambda$main$1(Test03_WaitNotify.java:51)
-	at java.lang.Thread.run(Thread.java:748)
-
-                         */
                             if (test.size() == 5) {
-                                //ç”±äºnotifyå¹¶æ²¡æœ‰é‡Šæ”¾locké”ï¼Œå½“å‰çº¿ç¨‹ä»åœ¨è¿è¡Œï¼Œä»æ‹¿ç€locké”ï¼Œå› æ­¤æ— æ³•åˆ‡æ¢åˆ°çº¿ç¨‹2ï¼Œæ— æ³•åˆ°è¾¾ç›®çš„
+                                //ÓÉÓÚnotify²¢Ã»ÓĞÊÍ·ÅlockËø£¬µ±Ç°Ïß³ÌÈÔÔÚÔËĞĞ£¬ÈÔÄÃ×ÅlockËø£¬Òò´ËÎŞ·¨ÇĞ»»µ½Ïß³Ì2£¬ÎŞ·¨µ½´ïÄ¿µÄ
                                 lock.notify();
                             }
 
@@ -72,7 +64,7 @@ public class Test04_NotifyHoldingLock {
                         }
                     }
 
-                    System.out.println("t1ç»“æŸ");
+                    System.out.println("t1½áÊø");
                 }
                 , "t1").start();
     }

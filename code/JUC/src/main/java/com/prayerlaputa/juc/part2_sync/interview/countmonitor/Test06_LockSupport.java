@@ -2,6 +2,7 @@ package com.prayerlaputa.juc.part2_sync.interview.countmonitor;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
 /**
@@ -10,12 +11,9 @@ import java.util.concurrent.locks.LockSupport;
  */
 public class Test06_LockSupport {
 
-
     volatile List list = new LinkedList();
 
 //    volatile List list = Collections.synchronizedList(new LinkedList<>());
-
-
 
     public void add(Object obj) {
         list.add(obj);
@@ -32,9 +30,9 @@ public class Test06_LockSupport {
 
         Thread t1 = null;
         Thread t2 = new Thread(() -> {
+            System.out.println("t2 执行");
             if (test.size() != 5) {
                 LockSupport.park();
-                System.out.println("t2 执行");
             }
             System.out.println("t2 结束");
 //            LockSupport.unpark(t1);
@@ -59,7 +57,8 @@ public class Test06_LockSupport {
                         达到预期，因为没有精确在第5个时准备执行。
                          */
 //                        try {
-//                            TimeUnit.SECONDS.sleep(1);
+////                            TimeUnit.SECONDS.sleep(1);
+//                            TimeUnit.NANOSECONDS.sleep(1);
 //                        } catch (InterruptedException e) {
 //                            e.printStackTrace();
 //                        }
@@ -69,7 +68,5 @@ public class Test06_LockSupport {
                 }
                 , "t1");
         t1.start();
-
-
     }
 }
