@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: provider
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://prayer1.com:8761/eureka/
+    healthcheck:
+      enabled: true
+
+server:
+  port: 81
