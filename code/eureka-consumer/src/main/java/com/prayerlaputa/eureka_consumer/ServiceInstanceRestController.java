@@ -1,4 +1,4 @@
-package com.prayerlaputa.eureka_provider;
+package com.prayerlaputa.eureka_consumer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
