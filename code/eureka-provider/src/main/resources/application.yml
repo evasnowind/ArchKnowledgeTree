@@ -5,7 +5,18 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://prayer1.com:8761/eureka/
+      defaultZone: http://prayer:123456@prayer1.com:8761/eureka/
+    #表示eureka client间隔多久去拉取服务注册信息，默认为30秒，对于api-gateway，如果要迅速获取服务注册状态，可以缩小该值，比如5秒
+    registry-fetch-interval-seconds: 5
+    # 将自己真正的健康状态传播到server。
+    healthcheck:
+      enabled: true
+  instance:
+    #续约发送间隔默认30秒，心跳间隔
+    lease-renewal-interval-in-seconds: 5
+    #续约到期时间（默认90秒）
+    lease-expiration-duration-in-seconds: 60
+
 
 server:
   port: 8763
