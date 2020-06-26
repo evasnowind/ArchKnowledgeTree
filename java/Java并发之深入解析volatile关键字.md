@@ -32,20 +32,6 @@ JSR-133在对JLS原始规范的改变中，有两处最有可能要求JVM实现�
 
 ### volatile的内存语义  
 
-
-
-CPU缓存级别
-
-CPU1			CPU2
-
-L1 cache  a	L1, L2 a
-
-L2 cache
-
-L3 cache
-
-内存a 
-
 >happens-before对volatile规则的定义 : volatile变量的写，先发生于后续对这个变量的读.
 >这句话的含义有两层:
 >volatile 的写操作, 需要将线程本地内存值,立马刷新到 主内存的共享变量中.
