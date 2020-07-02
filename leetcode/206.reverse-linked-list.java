@@ -17,7 +17,22 @@
  */
 class Solution {
     public ListNode reverseList(ListNode head) {
+        if (null == head) {
+            return null;
+        }
+
+        ListNode guardNode = new ListNode(0);
+        guardNode.next = null;
         
+        ListNode curNode = head, tmpNode;
+        while(null != curNode) {
+            tmpNode = curNode.next;
+            curNode.next = guardNode.next;
+            guardNode.next = curNode;
+            curNode = tmpNode;
+        }
+
+        return guardNode.next;
     }
 }
 // @lc code=end
