@@ -150,7 +150,7 @@ getData watch:WatchedEvent state:SyncConnected type:NodeDataChanged path:/test1
 new zk watch: WatchedEvent state:SyncConnected type:NodeDataChanged path:/test1
 connected state...
 
-                也就是说，此时生效的是zk初始化时传入的watcher!!!
+                也就是说，此时生效的是zk初始化时传入的默认default watcher!!!
                 若传false，即zk.getData(testPath,false, nodeStat);  则是告知zk后续不用加Wather，第二次执行时也就不会触发任何日志。
 new zk watch: WatchedEvent state:SyncConnected type:None path:null
 connected state...
