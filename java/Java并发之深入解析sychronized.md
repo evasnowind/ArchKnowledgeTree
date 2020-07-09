@@ -218,8 +218,6 @@ objectmonitor中的一个队列中，然后由系统调度加锁解锁。
 
 所以一定要注意JDK版本的差异、目前使用的JDK支持什么。
 
-## 
-
 
 
 ## synchronized实现原理
