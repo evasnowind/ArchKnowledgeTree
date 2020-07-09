@@ -7,23 +7,20 @@
 // @lc code=start
 class Solution {
     public int mySqrt(int x) {
-        if (0 == x) {
+        if(0 == x) {
 			return 0;
 		}
-
-		int halfOfX = x / 2 + 1;
-		int tmpResult = 0;
-		int result = 0;
-		for (int i = 1; i <= halfOfX; i++) {
-			tmpResult = i * i;
-			if (tmpResult == x) {
-				return i;
-			} else if (tmpResult > x) {
-				result = i - 1;
-				break;
+			
+		int low = 1, high = x, result = 0;
+		while(low <= high){
+			int mid = low + (high - low) / 2;
+			if(mid <= x / mid){
+				low = mid + 1;
+				result = mid;
+			} else {
+				high = mid - 1;
 			}
 		}
-
 		return result;
     }
 }
