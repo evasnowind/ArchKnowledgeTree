@@ -1,4 +1,4 @@
-package com.prayerlaputa.juc.part3_aqs.prayer_version;
+package com.prayerlaputa.juc.part3_aqs;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

@@ -7,7 +7,7 @@ public class TestReentrantLock {
 
     private static volatile int i = 0;
 
-    private static ReentrantLock lock = new ReentrantLock();
+    private static ReentrantLock lock = new ReentrantLock(true);
 
     public static void main(String[] args) {
 
@@ -48,8 +48,6 @@ public class TestReentrantLock {
         //}
 
         lock.unlock();
-
-        //synchronized 程序员的丽春院 JUC
     }
 
 
