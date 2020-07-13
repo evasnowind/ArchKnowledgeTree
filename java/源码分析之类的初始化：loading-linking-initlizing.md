@@ -1,6 +1,9 @@
 # 源码分析之类的初始化：loading-linking-initializing
 
-
+Java初始化的过程主要有3步：
+- 加载
+- 链接
+- 初始化
 
 ## loading 加载
 
