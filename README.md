@@ -1,11 +1,11 @@
-# JavaKnowledgeTree
+# ArchKnowledgeTree
 
 ## 目的
-整理个人知识谱系，形成一棵知识树，方便记忆，同时查漏补缺
+整理作为一名架构师所需的知识谱系（仅代表个人理解，我也在不断学习中，学无止境啊~~），形成一棵知识树，方便记忆，同时查漏补缺。
 
 ## 目录
 
-### 1. Java基础
+### Java基础
 
 #### IO
 - [Java常用命令行工具汇总](java/Java常用命令行工具汇总.md)
@@ -26,17 +26,13 @@
 - 
 
 
-### 2. Java高级特性
+### Java高级特性
 
-### 3. 框架
+### 框架
 
 #### spring
 
 #### spring boot
-- 1. [spring boot上传文件报错The temporary upload location is not valid](spring-boot上传文件报错The_temporary_upload_location_is_not_valid.md)
-- 2. [spring boot实现文件下载](frameworks/spring-boot/spring-boot实现文件下载.md)
-- 3. [spring boot连接mysql8时报errorCode 0 state 08001错误](frameworks/spring-boot/spring-boot连接mysql8时报errorCode_0_state_08001错误.md)
-
 #### spring cloud
 
 #### spring cloud alibaba
@@ -51,12 +47,10 @@
 ##### 动态调度
 
 
-### 4. linux
-- [在shell中split字符串并遍历](linux/在shell中split字符串并遍历.md)
-- [linux_shell脚本执行方式](linux/linux_shell脚本执行方式.md)
-- [linux常用命令整理](linux/linux常用命令整理.md)
+### linux
+- The C10K Problem
 
-### 5. 数据库
+### 数据库
 
 #### SQL
 
@@ -84,16 +78,16 @@
 
 
 
-### 6. 中间件
-#### 5.1 消息中间件
-##### 5.1.1 RabbitMQ
+### 中间件
+#### 消息中间件
+##### RabbitMQ
 
-##### 5.1.2 Kafka
+##### Kafka
 
-##### 5.1.3 RocketMQ
+##### RocketMQ
 
 
-#### 5.2 数据库中间件
+#### 数据库中间件
 
 ##### MyCAT
 
@@ -123,7 +117,7 @@
 
 #### PageHelper
 
-### 7. 第三方库
+### 第三方库
 
 #### apache commons
 
