@@ -6,7 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 /**
- * @author chenglong.yu@brgroup.com
+ * @author chenglong.yu
  * created on 2020/7/15
  */
 public class IOServer {

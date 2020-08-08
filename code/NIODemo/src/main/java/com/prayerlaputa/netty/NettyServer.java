@@ -10,7 +10,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.string.StringDecoder;
 
 /**
- * @author chenglong.yu@brgroup.com
+ * @author chenglong.yu
  * created on 2020/7/15
  */
 public class NettyServer {
