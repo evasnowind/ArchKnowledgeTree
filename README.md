@@ -17,7 +17,7 @@
 
 #### java 8新特性
 
-
+#### 
 
 ##### lambda 表达式使用
 
@@ -25,8 +25,20 @@
 - 1. [Function接口的使用]
 - 
 
-
 ### Java高级特性
+
+并发编程
+
+
+
+### 源码分析
+
+- joyqueue
+  - 京东开源的MQ
+- kafka
+- rocketmq
+
+
 
 ### 框架
 
@@ -122,5 +134,7 @@
 #### apache commons
 
 #### google guava
+
+​	缓存
 
 #### hutool
