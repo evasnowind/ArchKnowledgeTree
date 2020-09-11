@@ -1,4 +1,4 @@
-# 源码分析之rocketmq和kafka如何处理消息压缩
+# 源码分析之RocketMQ和kafka如何处理消息压缩
 
 
 
@@ -6,9 +6,9 @@
 
 mq在传递消息时，在面对大数据量的情况下，网卡可能会被打满，那这种情况下可以压缩消息、减小消息体积，进一步提高mq的吞吐量。
 
-比如在rocketmq kafka中都有压缩消息。
+比如在RocketMQ Kafka中都有压缩消息。
 
-## rocketmq producer如何压缩消息
+## RocketMQ producer如何压缩消息
 
 以`DefaultMQProducerImpl`为例，可以看到压缩消息的逻辑在`sendKernelImpl`方法中，这个工具方法的引用情况如下：
 
