@@ -1,4 +1,4 @@
-package com.prayerlaputa.juc.part6_others;
+package com.prayerlaputa.juc.part6_others.guava_ratelimiter;
 
 import com.google.common.util.concurrent.RateLimiter;
 
