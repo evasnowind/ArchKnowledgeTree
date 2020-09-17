@@ -42,7 +42,7 @@
 
 - [X] [源码分析之Kafka Consumer消费消息的过程](source_code/源码分析之Kafka Consumer消费消息的过程.md)
 - [ ] 源码分析之Kafka_Producer生产消息的过程
-- [X] [源码分析之RocketMQ Producer生产消息的过程及其设计模式分析](source_code/源码分析之RocketMQ Producer生产消息的过程及其设计模式分析.md)
+- [X] [源码分析之RocketMQ Producer生产消息的过程及其设计模式分析](source_code/源码分析之RocketMQ_Producer生产消息的过程及其设计模式分析.md)
 - [ ] 源码分析之RocketMQ_Consumer消息消息的过程
 - [X] [源码分析之RocketMQ如何处理消息压缩](source_code/源码分析之RocketMQ如何处理消息压缩.md)
 - [X] [源码分析之RocketMQ与Kafka的消息复制过程](source_code/源码分析之RocketMQ与Kafka的消息复制过程.md)
@@ -60,6 +60,7 @@
 - [ ] 源码分析之Eureka的服务注册与发现机制
 - [ ] 源码分析之Nacos实现服务注册与发现
 - [ ] 源码分析之Sentinel如何实现限流降级
+- [X] [源码分析之Spring Boot如何利用Spring Factories机制进行自动注入](source_code/源码分析之Spring_Boot如何利用Spring_Factories机制进行自动注入.md)
 
 
 ### Linux
