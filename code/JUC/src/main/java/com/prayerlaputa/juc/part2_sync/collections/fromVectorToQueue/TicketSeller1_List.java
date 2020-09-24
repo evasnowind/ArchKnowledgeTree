@@ -1,13 +1,13 @@
 /**
- * ÓĞNÕÅ»ğ³µÆ±£¬Ã¿ÕÅÆ±¶¼ÓĞÒ»¸ö±àºÅ
- * Í¬Ê±ÓĞ10¸ö´°¿Ú¶ÔÍâÊÛÆ±
- * ÇëĞ´Ò»¸öÄ£Äâ³ÌĞò
+ * æœ‰Nå¼ ç«è½¦ç¥¨ï¼Œæ¯å¼ ç¥¨éƒ½æœ‰ä¸€ä¸ªç¼–å·
+ * åŒæ—¶æœ‰10ä¸ªçª—å£å¯¹å¤–å”®ç¥¨
+ * è¯·å†™ä¸€ä¸ªæ¨¡æ‹Ÿç¨‹åº
  * 
- * ·ÖÎöÏÂÃæµÄ³ÌĞò¿ÉÄÜ»á²úÉúÄÄĞ©ÎÊÌâ£¿
- * ÖØ¸´ÏúÊÛ£¿³¬Á¿ÏúÊÛ£¿
+ * åˆ†æä¸‹é¢çš„ç¨‹åºå¯èƒ½ä¼šäº§ç”Ÿå“ªäº›é—®é¢˜ï¼Ÿ
+ * é‡å¤é”€å”®ï¼Ÿè¶…é‡é”€å”®ï¼Ÿ
  * 
  * 
- * @author ÂíÊ¿±ø
+ * @author é©¬å£«å…µ
  */
 package com.prayerlaputa.juc.part2_sync.collections.fromVectorToQueue;
 
@@ -18,25 +18,25 @@ public class TicketSeller1_List {
 	static List<String> tickets = new ArrayList<>();
 	
 	static {
-		for(int i=0; i<10000; i++) tickets.add("Æ±±àºÅ£º" + i);
+		for(int i=0; i<10000; i++) tickets.add("ç¥¨ç¼–å·ï¼š" + i);
 	}
 
 
 	public static void main(String[] args) {
-		/*
-		»á±¨Òì³££º
+	/*
+		ä¼šæŠ¥å¼‚å¸¸ï¼š
 		Exception in thread "Thread-4" java.lang.ArrayIndexOutOfBoundsException: -1
 	at java.util.ArrayList.remove(ArrayList.java:505)
 	at com.prayerlaputa.juc.part2_sync.collections.fromVectorToQueue.TicketSeller1.lambda$main$0(TicketSeller1.java:28)
 	at java.lang.Thread.run(Thread.java:748)
 
-		Ô­Òò£º
-		¶àÏß³Ì·ÃÎÊ£¬ticketsÊı×éÃ»±£Ö¤Ïß³Ì°²È«£¬ÆäÊµ¾ÍÊÇÔÚÄ£Äâ³¬Âô
+		åŸå› ï¼š
+		å¤šçº¿ç¨‹è®¿é—®ï¼Œticketsæ•°ç»„æ²¡ä¿è¯çº¿ç¨‹å®‰å…¨ï¼Œå…¶å®å°±æ˜¯åœ¨æ¨¡æ‹Ÿè¶…å–
 		 */
 		for(int i=0; i<10; i++) {
 			new Thread(()->{
 				while(tickets.size() > 0) {
-					System.out.println("ÏúÊÛÁË--" + tickets.remove(0));
+					System.out.println("é”€å”®äº†--" + tickets.remove(0));
 				}
 			}).start();
 		}

@@ -1,14 +1,14 @@
 /**
- * ÓĞNÕÅ»ğ³µÆ±£¬Ã¿ÕÅÆ±¶¼ÓĞÒ»¸ö±àºÅ
- * Í¬Ê±ÓĞ10¸ö´°¿Ú¶ÔÍâÊÛÆ±
- * ÇëĞ´Ò»¸öÄ£Äâ³ÌĞò
- * 
- * ·ÖÎöÏÂÃæµÄ³ÌĞò¿ÉÄÜ»á²úÉúÄÄĞ©ÎÊÌâ£¿
- *  
- * Ê¹ÓÃVector»òÕßCollections.synchronizedXXX
- * ·ÖÎöÒ»ÏÂ£¬ÕâÑùÄÜ½â¾öÎÊÌâÂğ£¿
- * 
- * @author ÂíÊ¿±ø
+ * æœ‰Nå¼ ç«è½¦ç¥¨ï¼Œæ¯å¼ ç¥¨éƒ½æœ‰ä¸€ä¸ªç¼–å·
+ * åŒæ—¶æœ‰10ä¸ªçª—å£å¯¹å¤–å”®ç¥¨
+ * è¯·å†™ä¸€ä¸ªæ¨¡æ‹Ÿç¨‹åº
+ * <p>
+ * åˆ†æä¸‹é¢çš„ç¨‹åºå¯èƒ½ä¼šäº§ç”Ÿå“ªäº›é—®é¢˜ï¼Ÿ
+ * <p>
+ * ä½¿ç”¨Vectoræˆ–è€…Collections.synchronizedXXX
+ * åˆ†æä¸€ä¸‹ï¼Œè¿™æ ·èƒ½è§£å†³é—®é¢˜å—ï¼Ÿ
+ *
+ * @author é©¬å£«å…µ
  */
 package com.prayerlaputa.juc.part2_sync.collections.fromVectorToQueue;
 
@@ -16,20 +16,22 @@ import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 
 public class TicketSeller2_Vector {
-	static Vector<String> tickets = new Vector<>();
-	
-	
-	static {
-		for(int i=0; i<1000; i++) tickets.add("Æ± ±àºÅ£º" + i);
-	}
-	
-	public static void main(String[] args) {
-		
-		for(int i=0; i<10; i++) {
-			new Thread(()->{
-				while(tickets.size() > 0) {
+    static Vector<String> tickets = new Vector<>();
+
+
+    static {
+        for (int i = 0; i < 1000; i++) {
+            tickets.add("ç¥¨ ç¼–å·ï¼š" + i);
+        }
+    }
+
+    public static void main(String[] args) {
+
+        for (int i = 0; i < 10; i++) {
+            new Thread(() -> {
+                while (tickets.size() > 0) {
 					/*
-					ÈÔ»á±¨Òì³££º
+					ä»ä¼šæŠ¥å¼‚å¸¸ï¼š
 					Exception in thread "Thread-6" Exception in thread "Thread-5" Exception in thread "Thread-2" Exception in thread "Thread-8" Exception in thread "Thread-0" Exception in thread "Thread-7" Exception in thread "Thread-4" Exception in thread "Thread-1" Exception in thread "Thread-9" java.lang.ArrayIndexOutOfBoundsException: Array index out of range: 0
 	at java.util.Vector.remove(Vector.java:831)
 	at com.prayerlaputa.juc.part2_sync.collections.fromVectorToQueue.TicketSeller2.lambda$main$0(TicketSeller2.java:39)
@@ -39,20 +41,20 @@ java.lang.ArrayIndexOutOfBoundsException: Array index out of range: 0
 	at com.prayerlaputa.juc.part2_sync.collections.fromVectorToQueue.TicketSeller2.lambda$main$0(TicketSeller2.java:39)
 	at java.lang.Thread.run(Thread.java:748)
 
-					Ô­Òò£ºËäÈ»ticketsÓÃÁËVector£¬±£Ö¤ÈİÆ÷±¾ÉíÊÇÏß³Ì°²È«µÄ£¬µ«ÊÇÔÚ
-					while(tickets.size() > 0)  Óë tickets.remove(0) ÕâÁ½¸ö²Ù×÷£¬Ã»ÓĞ±£Ö¤Ô­×ÓĞÔ¡£
-					¿ÉÄÜA¡¢BÁ½¸öÏß³Ìµ÷ÓÃtickets.size()Ê±£¬tickets¸ÕºÃÖ»Ê£ÏÂ1¸öÔªËØ£¬ÓÚÊÇ¡£¡£¡£
+					åŸå› ï¼šè™½ç„¶ticketsç”¨äº†Vectorï¼Œä¿è¯å®¹å™¨æœ¬èº«æ˜¯çº¿ç¨‹å®‰å…¨çš„ï¼Œä½†æ˜¯åœ¨
+					while(tickets.size() > 0)  ä¸ tickets.remove(0) è¿™ä¸¤ä¸ªæ“ä½œï¼Œæ²¡æœ‰ä¿è¯åŸå­æ€§ã€‚
+					å¯èƒ½Aã€Bä¸¤ä¸ªçº¿ç¨‹è°ƒç”¨tickets.size()æ—¶ï¼Œticketsåˆšå¥½åªå‰©ä¸‹1ä¸ªå…ƒç´ ï¼Œäºæ˜¯ã€‚ã€‚ã€‚
 					 */
-					try {
-						TimeUnit.MILLISECONDS.sleep(10);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					
-					
-					System.out.println("ÏúÊÛÁË--" + tickets.remove(0));
-				}
-			}).start();
-		}
-	}
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+
+                    System.out.println("é”€å”®äº†--" + tickets.remove(0));
+                }
+            }).start();
+        }
+    }
 }

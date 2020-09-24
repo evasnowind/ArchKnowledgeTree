@@ -1,9 +1,9 @@
 /**
- * Ğ´Ê±¸´ÖÆÈİÆ÷ copy on write
- * ¶àÏß³Ì»·¾³ÏÂ£¬Ğ´Ê±Ğ§ÂÊµÍ£¬¶ÁÊ±Ğ§ÂÊ¸ß
- * ÊÊºÏĞ´ÉÙ¶Á¶àµÄ»·¾³
+ * å†™æ—¶å¤åˆ¶å®¹å™¨ copy on write
+ * å¤šçº¿ç¨‹ç¯å¢ƒä¸‹ï¼Œå†™æ—¶æ•ˆç‡ä½ï¼Œè¯»æ—¶æ•ˆç‡é«˜
+ * é€‚åˆå†™å°‘è¯»å¤šçš„ç¯å¢ƒ
  *
- * @author ÂíÊ¿±ø
+ * @author é©¬å£«å…µ
  */
 package com.prayerlaputa.juc.part2_sync.collections.others;
 
@@ -15,7 +15,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class T02_CopyOnWriteList {
     public static void main(String[] args) {
         List<String> lists =
-                //new ArrayList<>(); //Õâ¸ö»á³ö²¢·¢ÎÊÌâ£¡
+                //new ArrayList<>(); //è¿™ä¸ªä¼šå‡ºå¹¶å‘é—®é¢˜ï¼
                 //new Vector();
                 new CopyOnWriteArrayList<>();
         Random r = new Random();
@@ -26,8 +26,8 @@ public class T02_CopyOnWriteList {
                 @Override
                 public void run() {
                     for (int i = 0; i < 1000; i++) {
-                    	lists.add("a" + r.nextInt(10000));
-					}
+                        lists.add("a" + r.nextInt(10000));
+                    }
                 }
             };
             ths[i] = new Thread(task);

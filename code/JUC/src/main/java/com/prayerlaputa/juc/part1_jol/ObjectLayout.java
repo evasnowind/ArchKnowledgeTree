@@ -15,7 +15,7 @@ public class ObjectLayout {
 
 //        Object o = new Object();
 
-        //延迟5s，因为JVM 有个机制
+        //延迟5s，因为JVM （至少在JVM 8）中，默认4s后才启动偏向锁，可以使用-XX:BiasedLockingStartupDelay 来配置启动时间
 //        Thread.sleep(5000);
 //
 //        Object o = new Object();

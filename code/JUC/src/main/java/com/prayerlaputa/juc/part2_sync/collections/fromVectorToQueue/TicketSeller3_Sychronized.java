@@ -1,18 +1,18 @@
 /**
- * ÓÐNÕÅ»ð³µÆ±£¬Ã¿ÕÅÆ±¶¼ÓÐÒ»¸ö±àºÅ
- * Í¬Ê±ÓÐ10¸ö´°¿Ú¶ÔÍâÊÛÆ±
- * ÇëÐ´Ò»¸öÄ£Äâ³ÌÐò
- * 
- * ·ÖÎöÏÂÃæµÄ³ÌÐò¿ÉÄÜ»á²úÉúÄÄÐ©ÎÊÌâ£¿
- * ÖØ¸´ÏúÊÛ£¿³¬Á¿ÏúÊÛ£¿
- * 
- * Ê¹ÓÃVector»òÕßCollections.synchronizedXXX
- * ·ÖÎöÒ»ÏÂ£¬ÕâÑùÄÜ½â¾öÎÊÌâÂð£¿
- * 
- * ¾ÍËã²Ù×÷AºÍB¶¼ÊÇÍ¬²½µÄ£¬µ«AºÍB×é³ÉµÄ¸´ºÏ²Ù×÷Ò²Î´±ØÊÇÍ¬²½µÄ£¬ÈÔÈ»ÐèÒª×Ô¼º½øÐÐÍ¬²½
- * ¾ÍÏñÕâ¸ö³ÌÐò£¬ÅÐ¶ÏsizeºÍ½øÐÐremove±ØÐëÊÇÒ»Õû¸öµÄÔ­×Ó²Ù×÷
- * 
- * @author ÂíÊ¿±ø
+ * æœ‰Nå¼ ç«è½¦ç¥¨ï¼Œæ¯å¼ ç¥¨éƒ½æœ‰ä¸€ä¸ªç¼–å·
+ * åŒæ—¶æœ‰10ä¸ªçª—å£å¯¹å¤–å”®ç¥¨
+ * è¯·å†™ä¸€ä¸ªæ¨¡æ‹Ÿç¨‹åº
+ * <p>
+ * åˆ†æžä¸‹é¢çš„ç¨‹åºå¯èƒ½ä¼šäº§ç”Ÿå“ªäº›é—®é¢˜ï¼Ÿ
+ * é‡å¤é”€å”®ï¼Ÿè¶…é‡é”€å”®ï¼Ÿ
+ * <p>
+ * ä½¿ç”¨Vectoræˆ–è€…Collections.synchronizedXXX
+ * åˆ†æžä¸€ä¸‹ï¼Œè¿™æ ·èƒ½è§£å†³é—®é¢˜å—ï¼Ÿ
+ * <p>
+ * å°±ç®—æ“ä½œAå’ŒBéƒ½æ˜¯åŒæ­¥çš„ï¼Œä½†Aå’ŒBç»„æˆçš„å¤åˆæ“ä½œä¹Ÿæœªå¿…æ˜¯åŒæ­¥çš„ï¼Œä»ç„¶éœ€è¦è‡ªå·±è¿›è¡ŒåŒæ­¥
+ * å°±åƒè¿™ä¸ªç¨‹åºï¼Œåˆ¤æ–­sizeå’Œè¿›è¡Œremoveå¿…é¡»æ˜¯ä¸€æ•´ä¸ªçš„åŽŸå­æ“ä½œ
+ *
+ * @author é©¬å£«å…µ
  */
 package com.prayerlaputa.juc.part2_sync.collections.fromVectorToQueue;
 
@@ -21,34 +21,36 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class TicketSeller3_Sychronized {
-	static List<String> tickets = new LinkedList<>();
+    static List<String> tickets = new LinkedList<>();
 
-	static {
-		for(int i=0; i<1000; i++) tickets.add("Æ± ±àºÅ£º" + i);
-	}
-	
-	public static void main(String[] args) {
-		
-		for(int i=0; i<10; i++) {
-			new Thread(()->{
-				while(true) {
+    static {
+        for (int i = 0; i < 1000; i++) {
+            tickets.add("ç¥¨ ç¼–å·ï¼š" + i);
+        }
+    }
+
+    public static void main(String[] args) {
+
+        for (int i = 0; i < 10; i++) {
+            new Thread(() -> {
+                while (true) {
 					/*
-					Õý³£½áÊø¡£
-					ÒòÎªÓÃÁËsychronized½«Õû¸ö²Ù×÷°üº¬ÆðÀ´£¬±£Ö¤Ô­×ÓÐÔ
+					æ­£å¸¸ç»“æŸã€‚
+					å› ä¸ºç”¨äº†sychronizedå°†æ•´ä¸ªæ“ä½œåŒ…å«èµ·æ¥ï¼Œä¿è¯åŽŸå­æ€§
 					 */
-					synchronized(tickets) {
-						if(tickets.size() <= 0) break;
-						
-						try {
-							TimeUnit.MILLISECONDS.sleep(10);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-						
-						System.out.println("ÏúÊÛÁË--" + tickets.remove(0));
-					}
-				}
-			}).start();
-		}
-	}
+                    synchronized (tickets) {
+                        if (tickets.size() <= 0) break;
+
+                        try {
+                            TimeUnit.MILLISECONDS.sleep(10);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                        System.out.println("é”€å”®äº†--" + tickets.remove(0));
+                    }
+                }
+            }).start();
+        }
+    }
 }

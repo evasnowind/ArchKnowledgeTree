@@ -12,20 +12,20 @@ public class Test3_Coarsening implements Runnable {
     public void run() {
         while (true) {
             /*
-            System.out.printlnÄÚ²¿ÊµÏÖÈçÏÂ£º
+            System.out.printlnå†…éƒ¨å®ç°å¦‚ä¸‹ï¼š
     public void println(String x) {
         synchronized (this) {
             print(x);
             newLine();
         }
     }
-            ¼´ÄÚ²¿´æÔÚsynchronizedËø¡£
+            å³å†…éƒ¨å­˜åœ¨synchronizedé”ã€‚
 
-            ÓÉÓÚ´Ë´¦System.out.println·½·¨ÔÚifÓï¾äÄÚ²¿£¬²¢²»ÊÇÃ¿´ÎÑ­»·¶¼»á½øĞĞ¼ÓËø¡¢½âËø²Ù×÷£¬
-            Òò´Ë²»»á·¢ÉúËø´Ö»¯£¬²¢ÇÒÓÉÓÚname²¢Ã»ÓĞ¼Óvolatile£¬µ¼ÖÂÖ÷Ïß³ÌÖĞname±ä»¯¶ÔÓÚµ±Ç°Ïß³Ì²»¿É¼û¡£
-            Òò´Ë×ÓÏß³Ì½«Ò»Ö±ËÀÑ­»·¡£
+            ç”±äºæ­¤å¤„System.out.printlnæ–¹æ³•åœ¨ifè¯­å¥å†…éƒ¨ï¼Œå¹¶ä¸æ˜¯æ¯æ¬¡å¾ªç¯éƒ½ä¼šè¿›è¡ŒåŠ é”ã€è§£é”æ“ä½œï¼Œ
+            å› æ­¤ä¸ä¼šå‘ç”Ÿé”ç²—åŒ–ï¼Œå¹¶ä¸”ç”±äºnameå¹¶æ²¡æœ‰åŠ volatileï¼Œå¯¼è‡´ä¸»çº¿ç¨‹ä¸­nameå˜åŒ–å¯¹äºå½“å‰çº¿ç¨‹ä¸å¯è§ã€‚
+            å› æ­¤å­çº¿ç¨‹å°†ä¸€ç›´æ­»å¾ªç¯ã€‚
 
-            Ò²¿ÉÒÔ´Ó·´±àÒë´úÂë×ÅÊÖÀí½â£¬±¾³ÌĞò·´±àÒëºóµÄ´úÂëÈçÏÂ£º
+            ä¹Ÿå¯ä»¥ä»åç¼–è¯‘ä»£ç ç€æ‰‹ç†è§£ï¼Œæœ¬ç¨‹åºåç¼–è¯‘åçš„ä»£ç å¦‚ä¸‹ï¼š
                  public void run()
                   {
                     while (!"wangcai".equals(name)) {}

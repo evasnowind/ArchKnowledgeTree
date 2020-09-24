@@ -1,5 +1,5 @@
 /**
- * �̳߳صĸ���
+ * 线程池的概念
  */
 package com.prayerlaputa.juc.part5_threadpool.demo;
 

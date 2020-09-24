@@ -12,17 +12,17 @@ public class Test1_Coarsening implements Runnable {
     public void run() {
         while (true) {
             /*
-            System.out.printlnÄÚ²¿ÊµÏÖÈçÏÂ£º
+            System.out.printlnå†…éƒ¨å®ç°å¦‚ä¸‹ï¼š
     public void println(String x) {
         synchronized (this) {
             print(x);
             newLine();
         }
     }
-            ¼´ÄÚ²¿´æÔÚsynchronizedËø¡£ÔÚwhileÑ­»·µÄÇé¿öÏÂ£¬»á·¢ÉúËø´Ö»¯£¬µ¼ÖÂÕû¸èwhileÑ­»·¶¼ÔÚËøµÄ·¶Î§ÄÚ¡£
-            Òò´ËnameÊôĞÔÊµ¼ÊÉÏÃ¿´Î¶¼ÊÇ´ÓÖ÷Ïß³ÌÄÚ´æÄÃÊı¾İ¡¢²»´æÔÚ¿É¼ûĞÔÎÊÌâ¡£
+            å³å†…éƒ¨å­˜åœ¨synchronizedé”ã€‚åœ¨whileå¾ªç¯çš„æƒ…å†µä¸‹ï¼Œä¼šå‘ç”Ÿé”ç²—åŒ–ï¼Œå¯¼è‡´æ•´æ­Œwhileå¾ªç¯éƒ½åœ¨é”çš„èŒƒå›´å†…ã€‚
+            å› æ­¤nameå±æ€§å®é™…ä¸Šæ¯æ¬¡éƒ½æ˜¯ä»ä¸»çº¿ç¨‹å†…å­˜æ‹¿æ•°æ®ã€ä¸å­˜åœ¨å¯è§æ€§é—®é¢˜ã€‚
 
-            ·´±àÒëºóµÄ
+            åç¼–è¯‘åçš„
               public void run()
               {
                 for (;;)

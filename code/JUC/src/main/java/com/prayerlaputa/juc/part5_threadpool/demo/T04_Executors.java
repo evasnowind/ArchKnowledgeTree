@@ -1,5 +1,5 @@
 /**
- * ÈÏÊ¶Executors
+ * è®¤è¯†Executors
  */
 package com.prayerlaputa.juc.part5_threadpool.demo;
 

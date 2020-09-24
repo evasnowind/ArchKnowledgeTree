@@ -1,6 +1,6 @@
 /**
- * ÈÏÊ¶Callable£¬¶ÔRunnable½øĞĞÁËÀ©Õ¹
- * ¶ÔCallableµÄµ÷ÓÃ£¬¿ÉÒÔÓĞ·µ»ØÖµ
+ * è®¤è¯†Callableï¼Œå¯¹Runnableè¿›è¡Œäº†æ‰©å±•
+ * å¯¹Callableçš„è°ƒç”¨ï¼Œå¯ä»¥æœ‰è¿”å›å€¼
  */
 package com.prayerlaputa.juc.part5_threadpool.demo;
 
@@ -20,9 +20,9 @@ public class T03_Callable {
         };
 
         ExecutorService service = Executors.newCachedThreadPool();
-        Future<String> future = service.submit(c); //Òì²½
+        Future<String> future = service.submit(c); //å¼‚æ­¥
 
-        System.out.println(future.get());//×èÈû
+        System.out.println(future.get());//é˜»å¡
 
         service.shutdown();
     }

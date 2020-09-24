@@ -1,37 +1,37 @@
 
 Callable Runnable + ret
-Future ´æ´¢Ö´ÐÐ½«À´²Å»á²úÉúµÄ½á¹û£¬Òì²½´¦Àí
-FutureTask ¡ª¡ª> Future + Runnable ½Ó¿Ú¶àÏß³Ì
-CompletableFuture --> ¹ÜÀí¶à¸öFutureµÄ½á¹û£¬½øÐÐÈÎÎñ¹ÜÀí£¬¶Ô½á¹û½øÐÐ×éºÏ´¦Àí
+Future å­˜å‚¨æ‰§è¡Œå°†æ¥æ‰ä¼šäº§ç”Ÿçš„ç»“æžœï¼Œå¼‚æ­¥å¤„ç†
+FutureTask â€”â€”> Future + Runnable æŽ¥å£å¤šçº¿ç¨‹
+CompletableFuture --> ç®¡ç†å¤šä¸ªFutureçš„ç»“æžœï¼Œè¿›è¡Œä»»åŠ¡ç®¡ç†ï¼Œå¯¹ç»“æžœè¿›è¡Œç»„åˆå¤„ç†
 
 
-Ïß³Ì³Ø¾Ü¾ø²ßÂÔ£¬Ä¬ÈÏÌá¹©ÁË4ÖÖ£¬¿ÉÒÔ×Ô¶¨Òå
-¡ª¡ª×¢ÒâËµ·¨Òª¾«È·¡£
-
-
-
+çº¿ç¨‹æ± æ‹’ç»ç­–ç•¥ï¼Œé»˜è®¤æä¾›äº†4ç§ï¼Œå¯ä»¥è‡ªå®šä¹‰
+â€”â€”æ³¨æ„è¯´æ³•è¦ç²¾ç¡®ã€‚
 
 
 
-Ò»µÀË¼¿¼Ìâ£º
 
-ÃæÊÔ£º¼ÓÈëÌá¹©Ò»¸öÄÖÖÓ·þÎñ£¬¶©ÔÄ·þÎñµÄÈËºÜ¶à£¬10ÒÚÈË£¬ÔõÃ´ÓÅ»¯£¿
-¿ª·ÅÌâÄ¿£º
-1¡¢×ÜµÄ·þÎñÆ÷·Ö·¢µ½±ßÔµ·þÎñÆ÷
-2¡¢Ã¿¸ö·þÎñÆ÷ÉÏÓÃ¶ÓÁÐ£¬´æ×ÅÈÎÎñ£¬Ò»¸ö¸öÏß³ÌÏû·Ñ
-3¡¢¡£¡£¡£¡£
+
+
+ä¸€é“æ€è€ƒé¢˜ï¼š
+
+é¢è¯•ï¼šåŠ å…¥æä¾›ä¸€ä¸ªé—¹é’ŸæœåŠ¡ï¼Œè®¢é˜…æœåŠ¡çš„äººå¾ˆå¤šï¼Œ10äº¿äººï¼Œæ€Žä¹ˆä¼˜åŒ–ï¼Ÿ
+å¼€æ”¾é¢˜ç›®ï¼š
+1ã€æ€»çš„æœåŠ¡å™¨åˆ†å‘åˆ°è¾¹ç¼˜æœåŠ¡å™¨
+2ã€æ¯ä¸ªæœåŠ¡å™¨ä¸Šç”¨é˜Ÿåˆ—ï¼Œå­˜ç€ä»»åŠ¡ï¼Œä¸€ä¸ªä¸ªçº¿ç¨‹æ¶ˆè´¹
+3ã€ã€‚ã€‚ã€‚ã€‚
 
 FixedThread
-¿ÉÒÔ²¢ÐÐÖ´ÐÐ
+å¯ä»¥å¹¶è¡Œæ‰§è¡Œ
 
-# ²¢ÐÐ£¨Concurrency£© VS ²¢·¢(Paralism)
+# å¹¶è¡Œï¼ˆConcurrencyï¼‰ VS å¹¶å‘(Paralism)
 
-# ThreadPolExecutorÔ´Âë·ÖÎö  
+# ThreadPolExecutoræºç åˆ†æž  
 
-WorkerÀà
-    ÊµÏÖÁËRunnable¡¢AQS½Ó¿Ú
-    ±£´æÈÎÎñ×´Ì¬£¬ËùÒÔÖØÐÂ·â×°
-    ¶àÏß³ÌÕùÇÀÕâ¸öworker£¬ËùÒÔÐèÒªÀûÓÃAQS
+Workerç±»
+    å®žçŽ°äº†Runnableã€AQSæŽ¥å£
+    ä¿å­˜ä»»åŠ¡çŠ¶æ€ï¼Œæ‰€ä»¥é‡æ–°å°è£…
+    å¤šçº¿ç¨‹äº‰æŠ¢è¿™ä¸ªworkerï¼Œæ‰€ä»¥éœ€è¦åˆ©ç”¨AQS
 
 submit
 

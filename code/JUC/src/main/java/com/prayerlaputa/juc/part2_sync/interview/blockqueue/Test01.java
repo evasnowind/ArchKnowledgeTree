@@ -13,7 +13,7 @@ public class Test01<T> {
     private int MAX_CAPACITY = 10;
 
     /**
-     * ע�⣺��Ҫ��volatile���Ա㱣֤�ɼ���
+     * 使用volatile修饰，保证多线程可见性
      */
     private volatile int count = 0;
 
@@ -60,7 +60,7 @@ public class Test01<T> {
             Thread t = new Thread(() -> {
                 for (int j = 0; j < 10; j++) {
                     test01.put(j);
-                    System.out.println("������" + tmp + " " + j + " count=" + test01.getCount());
+                    System.out.println("存入" + tmp + " " + j + " count=" + test01.getCount());
                 }
             }
             );
@@ -76,7 +76,7 @@ public class Test01<T> {
         for (int i = 0; i < 2; i++) {
             new Thread(() ->{
                 for(int j = 0; j < 50; j++) {
-                    System.out.println("���ѣ�" + test01.get() + " count=" + test01.getCount());
+                    System.out.println("获取" + test01.get() + " count=" + test01.getCount());
                 }
 
             }).start();
