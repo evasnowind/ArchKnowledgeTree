@@ -11,9 +11,9 @@
 
 ### Java Core / J.U.C
 
-- [JDK各个版本特性速览](java/JDK各个版本特性速览.md)
-- [Java并发之深入解析sychronized](java/Java并发之深入解析sychronized.md)
-- [Java并发之深入解析volatile关键字](java/Java并发之深入解析volatile关键字.md)
+- [ X ][JDK各个版本特性速览](java/JDK各个版本特性速览.md)
+- [ X ][Java并发之深入解析sychronized](java/Java并发之深入解析sychronized.md)
+- [ X ][Java并发之深入解析volatile关键字](java/Java并发之深入解析volatile关键字.md)
 
 ### JVM  
 
@@ -33,6 +33,7 @@
 - [X] [源码分析之双亲委托模型以及如何破坏双亲委托](source_code/源码分析之双亲委托模型以及如何破坏双亲委托.md)
 - [X] [源码分析之JDBC实现原理与SPI机制](source_code/源码分析之JDBC实现原理与SPI机制.md)
 - [X] [tomcat和dubbo对于JDK线程池的修改](source_code/tomcat和dubbo对于JDK线程池的修改.md)
+- [X] [源码分析之Java线程池ThreadPoolExecutor](source_code/源码分析之Java线程池ThreadPoolExecutor.md)
 
 #### 常见工具
 - [X] [源码分析之Guava RateLimiter源码分析](source_code/源码分析之Guava RateLimiter源码分析.md)
@@ -57,7 +58,9 @@
 
 #### Spring Cloud / Spring Cloud Alibaba  
 
-- [ ] 源码分析之Eureka的服务注册与发现机制
+- [x] 源码分析之Eureka的服务注册与发现机制
+  - [x] [源码分析之Eureka客户端源码解析](source_code/源码分析之Eureka客户端源码解析.md)
+  - [x] [源码分析之Eureka服务端源码解析](source_code/源码分析之Eureka服务端源码解析.md)
 - [ ] 源码分析之Nacos实现服务注册与发现
 - [ ] 源码分析之Sentinel如何实现限流降级
 - [X] [源码分析之Spring Boot如何利用Spring Factories机制进行自动注入](source_code/源码分析之Spring_Boot如何利用Spring_Factories机制进行自动注入.md)
