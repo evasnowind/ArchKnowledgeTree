@@ -135,4 +135,35 @@
 ### 架构
 - [左耳听风专栏学习笔记](architecture/左耳听风专栏学习笔记.md)
 - [必知必会的架构思想](drchitecture/必知必会的架构思想.xmind)
-- 
+
+
+
+### 实践
+
+我本人整理写的一系列供学习用的demo
+
+- [spring-cloud-demo-collection ](https://github.com/evasnowind/spring-cloud-demo-collection)
+  
+  - spring cloud全家桶组件的使用
+  
+- [rpc-learning](https://github.com/evasnowind/rpc-learning)
+
+  - RPC关键技术展示。
+
+- ### [framework-dev-learning](https://github.com/evasnowind/framework-dev-learning)
+
+  - 开发一个框架经常用到的技术汇总，如：动态代理，AOP，池化技术，Java SPI，spring factories机制等
+
+- [mq-learning](https://github.com/evasnowind/mq-learning)
+
+  - MQ相关常见技术展示
+
+- [netty-im](https://github.com/evasnowind/netty-im)
+  
+  - 参考掘金小册子，学习如何使用Netty仿写微信，学习Netty内部机制、如何使用。
+  
+- [seckill-learning](https://github.com/evasnowind/seckill-learning) 
+
+  - 秒杀相关技术展示, TODO
+  - 类似的项目：[redpacket-learning](https://github.com/evasnowind/redpacket-learning) 一个抢红包服务的demo
+
