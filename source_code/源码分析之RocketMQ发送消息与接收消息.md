@@ -26,36 +26,6 @@
 
 
 
-DefaultMQProducerImpl#sendDefaultImpl()方法的一些阅读笔记（我自己的简要即了）如下：
-
-```
-private SendResult sendDefaultImpl(
-        Message msg,
-        final CommunicationMode communicationMode,
-        final SendCallback sendCallback,
-        final long timeout
-    ) {
-    //检查service状态
-    //生成一个随机的invokeId
-    //根据消息中的topic，从本地ConccurentHashMap中获取TopicPublishInfo 
-    //检查TopicPublishInfo 状态，若不正常，需要利用MQClientInstance 去更新topic路由信息
-    	获取路由信息通过netty发起RPC请求，而这个请求过程参见NettyRemoteClient.java  NettyRemotingAbstract.java
-    		此处使用了模板方法模式
-		更新brokerAddrTable，保存brokerName --> （brokerId -> brokerAddr）
-		TopicPublishInfo 更新后还需要将其更新到本地客户端中：producer所持有的的producer列表中的topic信息；consumer所持有的topic信息
-		
-	更新ConcurrentMap<String/* Topic */, TopicRouteData> topicRouteTable 
-	
-	发送消息时，每个消息带有一个唯一id，看上去该id有两部分组成：
-	FIX_STRING、COUNTER两个拼接出来，包含有IP、时间戳、当前客户端计数等，以便保证唯一。
-	
-	具体逻辑积参见MessageClientIDSetter#createUniqID（）
-	
-	
-}
-    
-```
-
 ### producer发送消息简要说明
 
 下面引自：https://www.cnblogs.com/sunshine-2015/p/6291116.html 并做了一定扩充：

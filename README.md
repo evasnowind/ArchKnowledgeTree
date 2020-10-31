@@ -167,3 +167,14 @@
   - 秒杀相关技术展示, TODO
   - 类似的项目：[redpacket-learning](https://github.com/evasnowind/redpacket-learning) 一个抢红包服务的demo
 
+
+
+## 推荐学习资料
+
+- 中华石杉 java面试突击
+  - 视频课程，第一季已免费开放，目前已更新至第三季，很值得看。
+  - 第一季 资料地址：https://github.com/shishan100/Java-Interview-Advanced
+- JavaGuide
+- fucking-java-concurrency
+  - https://github.com/oldratlee/fucking-java-concurrency
+- 
