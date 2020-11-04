@@ -89,7 +89,7 @@
 
 ### 进程挂起（process pauses）
 
-### 时钟不同步和顺序事件（unsynchronized clocks and orderding events）
+### 时钟不同步和有序事件（unsynchronized clocks and ordering events）
 
 ## 拼在一起 - 一个分布式系统实例
 
