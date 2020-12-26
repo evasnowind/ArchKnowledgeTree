@@ -11,9 +11,9 @@
 
 ### Java Core / J.U.C
 
-- [ X ][JDK各个版本特性速览](java/JDK各个版本特性速览.md)
-- [ X ][Java并发之深入解析sychronized](java/Java并发之深入解析sychronized.md)
-- [ X ][Java并发之深入解析volatile关键字](java/Java并发之深入解析volatile关键字.md)
+- [x] [JDK各个版本特性速览](java/JDK各个版本特性速览.md)
+- [x] [Java并发之深入解析sychronized](java/Java并发之深入解析sychronized.md)
+- [x] [Java并发之深入解析volatile关键字](java/Java并发之深入解析volatile关键字.md)
 
 ### JVM  
 
@@ -170,11 +170,6 @@
 
 
 ## 推荐学习资料
+- [JavaGuide](https://github.com/Snailclimb/JavaGuide)
+- [fucking-java-concurrency](https://github.com/oldratlee/fucking-java-concurrency)
 
-- 中华石杉 java面试突击
-  - 视频课程，第一季已免费开放，目前已更新至第三季，很值得看。
-  - 第一季 资料地址：https://github.com/shishan100/Java-Interview-Advanced
-- JavaGuide
-- fucking-java-concurrency
-  - https://github.com/oldratlee/fucking-java-concurrency
-- 
