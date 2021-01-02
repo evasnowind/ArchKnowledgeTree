@@ -201,5 +201,3 @@ private static class DefaultGatewayFilterChain implements GatewayFilterChain {
 关键的`filter`方法则是利用了Reactor的反应式编程，写成了一个递归的方式来实现filter chain, `DefaultGatewayFilterChain`的`index`成员变量保存了当前需要执行的filter在filters数组中的位置，执行完毕后调用每个实现`GatewayFilter`接口都必须实现的`Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain)`方法，`index`为0则停止执行。这样就能实现filter chain。
 
 具体的实现逻辑需要对反应式编程比较熟悉，我本人目前还不熟，等后续进一步分析。
-
-- https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/java/spring/springcloudGateway/流程类.md)
