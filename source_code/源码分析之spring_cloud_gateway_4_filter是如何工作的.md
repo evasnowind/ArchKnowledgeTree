@@ -8,7 +8,7 @@
 
 ## 事先准备
 
-参见
+参见[源码分析之spring_cloud_gateway_3_请求被路由的过程解析](源码分析之spring_cloud_gateway_3_请求被路由的过程解析.md) 中的“准备工作”部分。
 
 ## 分析过程
 
