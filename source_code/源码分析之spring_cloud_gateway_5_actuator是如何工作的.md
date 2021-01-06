@@ -9,6 +9,7 @@
 - 在SCG中如何使用actuator？
 - SCG中的actuator能做什么？
 - 在代码层面上，SCG如何实现actuator？
+- 如何基于SCG的actuator进行监控？
 
 ## 1、在SCG中如何使用actuator？
 
@@ -79,13 +80,44 @@ management.endpoints.web.exposure.include=gateway
 | `routes/{id}`   | POST        | Adds a new route to the gateway.                             |
 | `routes/{id}`   | DELETE      | Removes an existing route from the gateway.                  |
 
+上面表格不是很直观，举几个典型的例子：
 
+- 当我们想知道Gateway启用了哪些全局过滤器，或者想知道这些全局过滤器的执行顺序：
+  - 访问/actuator/gateway/globalfilters
+- 想知道当前SCG启用了哪些过滤器工厂？
+  - 访问/actuator/gateway/routefilters
+- 想知道定义了哪些路由、又不想看配置文件？
+  - 访问/actuator/gateway/routes
 
 ## 3、在代码层面上，SCG如何实现actuator？
 
-2020.1.5 暂时写到这里，明天继续
+
+
+
+
+
+
+## 4、如何基于SCG的actuator进行监控？
+
+一般而言，由于各个公司的监控系统需要根据公司内部各个系统的情况进行定制化的开发。
+
+目前比较流行的监控搭配：
+
+- ELK/ELF：
+  - Elastic Search + Logstash + Kibana/Filebeat
+  - 日志的收集+检索
+- Prometheus + Grafana
+  - 数据收集+监控数据可视化
+  - 多数开源项目都已提供了现成的Prometheus  exporter，以便暴露接口、Prometheus 能拿到这些数据。
+
+而在spring boot中，提供了actuator用于暴露监控信息。
+
+//TODO 1.6 简单过了下监控相关的知识，接下来需要写如何自定义一个endpoint, 如何编写一个exporter
+
+
 
 
 ## 参考资料
 
 - [Spring Cloud Gateway](https://docs.spring.io/spring-cloud-gateway/docs/2.2.5.RELEASE/reference/html/#actuator-api)
+- [actuator 监控服务](https://github.com/smltq/spring-boot-demo/blob/master/actuator/README.md)
