@@ -91,15 +91,17 @@ management.endpoints.web.exposure.include=gateway
 
 ## 3、在代码层面上，SCG如何实现actuator？
 
+在源码层面上，`spring-cloud-gateway-server`是整个SCG的核心，可以看到`actuator`包，明显就是`actuator`的实现代码。简单看下，可以看到基类`AbstractGatewayControllerEndpoint`，`GatewayControllerEndpoint`、 `GatewayLegacyControllerEndpoint`都是继承自这个类，并且这两个类都加了`@RestControllerEndpoint`注解，该注解来自`spring-boot-actuator`。
 
+简单说，SCG实现`actuator`时，就是将SCG中的关键信息，放到`GatewayControllerEndpoint`、`GatewayLegacyControllerEndpoint`中，比如route信息、filter信息，这些成员变量封装在`AbstractGatewayControllerEndpoint`类中的`routeDefinitionLocator`、`globalFilters`、`GatewayFilters`、`routePredicates`等变量中，访问对应的`actuator`接口时，比如获取所有route信息，那直接读取这些变量、组装对应报文，返回即可。
 
-
+由于利用了`spring-boot-actuator`已有逻辑，此处SCG的actuator实现非常简单，关于`spring-boot-actuator`的实现原理暂时略过。
 
 
 
 ## 4、如何基于SCG的actuator进行监控？
 
-一般而言，由于各个公司的监控系统需要根据公司内部各个系统的情况进行定制化的开发。
+一般而言，监控系统需要根据自己公司内部各个系统的情况进行定制化的开发。
 
 目前比较流行的监控搭配：
 
@@ -110,9 +112,21 @@ management.endpoints.web.exposure.include=gateway
   - 数据收集+监控数据可视化
   - 多数开源项目都已提供了现成的Prometheus  exporter，以便暴露接口、Prometheus 能拿到这些数据。
 
-而在spring boot中，提供了actuator用于暴露监控信息。
+而在spring boot中，提供了actuator用于暴露监控信息，所以基本上数据流如下：
+
+> spring cloud项目/组件 -> actuator暴露监控信息 ->  Prometheus  exporter -> Prometheus报警，Grafana展示
+
+
 
 //TODO 1.6 简单过了下监控相关的知识，接下来需要写如何自定义一个endpoint, 如何编写一个exporter
+
+
+
+
+
+## TODO事宜
+
+- spring boot actuator实现原理
 
 
 
@@ -121,3 +135,4 @@ management.endpoints.web.exposure.include=gateway
 
 - [Spring Cloud Gateway](https://docs.spring.io/spring-cloud-gateway/docs/2.2.5.RELEASE/reference/html/#actuator-api)
 - [actuator 监控服务](https://github.com/smltq/spring-boot-demo/blob/master/actuator/README.md)
+- [ApplicationEventPublisherAware事件发布详解](https://blog.csdn.net/qq_28060549/article/details/81073001)
