@@ -118,15 +118,28 @@ management.endpoints.web.exposure.include=gateway
 
 
 
-//TODO 1.6 简单过了下监控相关的知识，接下来需要写如何自定义一个endpoint, 如何编写一个exporter
 
 
+
+
+
+
+一般网关
+
+
+
+2个思路：
+
+1、集成Prometheus, 加上拦截器
+
+2、研究spring boot actuator官方文档，看看原理，
 
 
 
 ## TODO事宜
 
 - spring boot actuator实现原理
+- 自定义actuator指标
 
 
 
@@ -136,3 +149,4 @@ management.endpoints.web.exposure.include=gateway
 - [Spring Cloud Gateway](https://docs.spring.io/spring-cloud-gateway/docs/2.2.5.RELEASE/reference/html/#actuator-api)
 - [actuator 监控服务](https://github.com/smltq/spring-boot-demo/blob/master/actuator/README.md)
 - [ApplicationEventPublisherAware事件发布详解](https://blog.csdn.net/qq_28060549/article/details/81073001)
+- [spring boot actuator官方文档](https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-features.html#production-ready)
