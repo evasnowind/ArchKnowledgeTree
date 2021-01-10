@@ -6,10 +6,6 @@
 
 1、梳理spring boot actuator关键知识点
 
-2、学习spring boot actuator相关知识
-
-
-
 ## 基本概念
 
 `endpoint`有两种状态：
@@ -24,6 +20,38 @@
 常见的`endpoint`有health、info、metrics、shutdown等，如果是web项目，则还可以配置heapdump、jolokia、logfile、prometheus等。完整的列表参见https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-features.html#production-ready 
 
 
+
+| ID                 | Description                                                  |
+| :----------------- | :----------------------------------------------------------- |
+| `auditevents`      | Exposes audit events information for the current application. Requires an `AuditEventRepository` bean. |
+| `beans`            | Displays a complete list of all the Spring beans in your application. |
+| `caches`           | Exposes available caches.                                    |
+| `conditions`       | Shows the conditions that were evaluated on configuration and auto-configuration classes and the reasons why they did or did not match. |
+| `configprops`      | Displays a collated list of all `@ConfigurationProperties`.  |
+| `env`              | Exposes properties from Spring’s `ConfigurableEnvironment`.  |
+| `flyway`           | Shows any Flyway database migrations that have been applied. Requires one or more `Flyway` beans. |
+| `health`           | Shows application health information.                        |
+| `httptrace`        | Displays HTTP trace information (by default, the last 100 HTTP request-response exchanges). Requires an `HttpTraceRepository` bean. |
+| `info`             | Displays arbitrary application info.                         |
+| `integrationgraph` | Shows the Spring Integration graph. Requires a dependency on `spring-integration-core`. |
+| `loggers`          | Shows and modifies the configuration of loggers in the application. |
+| `liquibase`        | Shows any Liquibase database migrations that have been applied. Requires one or more `Liquibase` beans. |
+| `metrics`          | Shows ‘metrics’ information for the current application.     |
+| `mappings`         | Displays a collated list of all `@RequestMapping` paths.     |
+| `scheduledtasks`   | Displays the scheduled tasks in your application.            |
+| `sessions`         | Allows retrieval and deletion of user sessions from a Spring Session-backed session store. Requires a Servlet-based web application using Spring Session. |
+| `shutdown`         | Lets the application be gracefully shutdown. Disabled by default. |
+| `startup`          | Shows the startup steps data collected by the `ApplicationStartup`. Requires the `SpringApplication` to be configured with a `BufferingApplicationStartup`. |
+| `threaddump`       | Performs a thread dump.                                      |
+
+如果是web应用（Spring MVC, Spring Webflux, Jersey），还可以使用：
+
+| ID           | Description                                                  |
+| :----------- | :----------------------------------------------------------- |
+| `heapdump`   | Returns an `hprof` heap dump file.                           |
+| `jolokia`    | Exposes JMX beans over HTTP (when Jolokia is on the classpath, not available for WebFlux). Requires a dependency on `jolokia-core`. |
+| `logfile`    | Returns the contents of the logfile (if `logging.file.name` or `logging.file.path` properties have been set). Supports the use of the HTTP `Range` header to retrieve part of the log file’s content. |
+| `prometheus` | Exposes metrics in a format that can be scraped by a Prometheus server. Requires a dependency on `micrometer-registry-prometheus`. |
 
 ### 在spring boot项目中配置endpoint
 
@@ -151,6 +179,12 @@ management:
 https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-features.html#production-ready-endpoints-custom
 
 更易懂一点的例子可以参考：https://gitee.com/springboot-source/endpoint/
+
+
+
+
+
+
 
 
 
