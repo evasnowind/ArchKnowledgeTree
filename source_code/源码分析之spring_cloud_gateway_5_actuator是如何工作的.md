@@ -118,24 +118,6 @@ management.endpoints.web.exposure.include=gateway
 
 
 
-
-
-
-
-
-
-一般网关
-
-
-
-2个思路：
-
-1、集成Prometheus, 加上拦截器
-
-2、研究spring boot actuator官方文档，看看原理，
-
-
-
 ## TODO事宜
 
 - spring boot actuator实现原理
