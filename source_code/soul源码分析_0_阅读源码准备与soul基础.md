@@ -156,7 +156,15 @@ soul是一个异步的，高性能的，跨语言的，响应式的API网关。
 
 ![](images/soul-framework.png)
 
+### 基本概念
 
+- 插件（plugin）
+  - 参见上图，`soul`中通过一个个插件来实现各种功能，插件可以热插拔，所有插件形成一个链，顺序执行（有些类似于Spring Cloud Gateway中的filter）。
+- 选择器（selector）和规则（rule）
+  - 一个插件有多个选择器，一个选择器对应多种规则。选择器相当于是对流量的第一次筛选，规则就是最终的筛选。
+  - 选择器和规则就是为了让流量在满足特定的条件下，才去执行我们想要的逻辑。
+
+更详细的解释参见官方：https://dromara.org/zh-cn/docs/soul/selector.html
 
 ## 总结
 
