@@ -14,7 +14,7 @@
   - 节点的初始状态就是follower，follower只能被动响应请求RPC，从不主动发起请求RPC。
   - 如果follower在一定时间范围（后面会讲，这个叫election timeout）内没有收到leader的请求，则follower可以转变成candidate（If followers don't hear from a leader then they can become a candidate.）
 - candidate
-  - 一个临时的状态，只存在于选举leader阶段。一个节点想要变成leader，那么就发起投票请求，同时自己变成candidate。如果选举成功，则变为candidate，否则退回为follower。其他节点根据当前状态回复是否，如果已经投票给其他candidate，则不会再投票给这个candidate（一个节点只有一票）。
+  - 一个临时的状态，只存在于选举leader阶段。一个节点想要变成leader，那么就发起投票请求，同时自己变成candidate。如果选举成功，则变为leader，否则退回为follower。其他节点根据当前状态回复是否，如果已经投票给其他candidate，则不会再投票给这个candidate（一个节点只有一票）。
   - 获得多数选票的candidate（n/2+1）将会变成leader。
 
 3种状态的流转参见此图：
