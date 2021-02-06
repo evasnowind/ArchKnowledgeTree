@@ -1,0 +1,256 @@
+﻿此次测试是在云服务器上进行的
+
+腾讯云服务器配置docker镜像源
+1.创建或修改 /etc/docker/daemon.json 文件，并写入以下内容：
+{
+   "registry-mirrors": [
+       "https://mirror.ccs.tencentyun.com"
+  ]
+}
+
+2.依次执行以下命令，重新启动 Docker 服务。
+systemctl daemon-reload
+service docker restart
+
+3.检查是否生效
+docker info
+Registry Mirrors:
+ https://mirror.ccs.tencentyun.com
+
+
+
+docker容器内apt更换国内源
+vim /etc/apt/sources.list
+    deb http://mirrors.163.com/debian/ jessie main non-free contrib
+    deb http://mirrors.163.com/debian/ jessie-updates main non-free contrib
+    deb http://mirrors.163.com/debian/ jessie-backports main non-free contrib
+    deb-src http://mirrors.163.com/debian/ jessie main non-free contrib
+    deb-src http://mirrors.163.com/debian/ jessie-updates main non-free contrib
+    deb-src http://mirrors.163.com/debian/ jessie-backports main non-free contrib
+    deb http://mirrors.163.com/debian-security/ jessie/updates main non-free contrib
+    deb-src http://mirrors.163.com/debian-security/ jessie/updates main non-free contrib
+    #更新安装源
+    apt-get update 
+
+mysql sh内部
+在出现warning之后立刻执行show warnings;就可以看到提示信息。
+注意：warnings只记录上一次执行的提示，如果你在出现一个warning之后，再执行了一次正常的查询，如select 1/0; 得到一个warning,然后又执行了select now();这次没有告警，你再做show warnings也是看不到告警信息了。
+
+-----------------------------------------------------------docker操作-----------------------------------------------------------
+# 查询mysql
+docker search mysql
+
+# 拉取最新的mysql镜像
+docker pull mysql
+
+# 查看镜像
+docker images -a
+
+# 启动master 端口号映射3339
+docker run -p 3339:3306 --name matster -e MYSQL_ROOT_PASSWORD=123456 -d mysql
+
+# 启动slave 端口号映射3340
+docker run -p 3340:3306 --name slave -e MYSQL_ROOT_PASSWORD=123456 -d mysql
+
+# 查看镜像运行情况,查看CONTAINER ID
+docker ps
+
+
+----------------------------------------------------------docker-master镜像内部操作----------------------------------------------
+# 命令进入到Master容器内部
+docker exec -it {CONTAINER ID} /bin/bash
+
+# 切换到/etc/mysql目录下
+cd etc/mysql
+
+# 对my.cnf进行编辑(此时会报错,容器内部没有vim,需要进行安装 1.apt-get update 2.apt-get install vim)
+
+vi my.cnf
+
+添加配置
+[mysqld]
+## 同一局域网内注意要唯一
+server-id=100  
+## 开启二进制日志功能，可以随便取（关键）
+log-bin=mysql-bin
+
+# 退出容器
+exit
+
+# 重启容器
+docker restart CONTAINER ID
+
+----------------------------------------------------------docker-slave镜像内部操作----------------------------------------------
+
+# 添加配置
+[mysqld]
+## 设置server_id,注意要唯一
+server-id=101  
+## 开启二进制日志功能，以备Slave作为其它Slave的Master时使用
+log-bin=slave-bin
+
+# 从容器中将文件 复制到主机
+docker cp 3643ee48db6b:/etc/mysql/my.cnf .  (注意"." 代表复制到当前的目录)
+
+# 修改文件并复制到容器内部
+docker cp my.cnf 3643ee48db6b:/etc/mysql/my.cnf
+# 重启服务
+docker restart 3643ee48db6b
+
+https://www.cnblogs.com/linjiaxin/p/12761296.html
+
+
+----------------------------------------------------------docker主从操作----------------------------------------------
+进入容器修改master 的读写权限
+
+# 进入容器shell
+$ docker exec -it /bin/sh
+
+mysql -uroot -p
+
+# 设置权限
+// mysql shell
+// 用户名：root
+// 密码：root
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+
+mysql>  show master status;
++------------------+----------+--------------+------------------+-------------------+
+| File             | Position | Binlog_Do_DB | Binlog_Ignore_DB | Executed_Gtid_Set |
++------------------+----------+--------------+------------------+-------------------+
+| mysql-bin.000001 |      391 |              |                  |                   |
++------------------+----------+--------------+------------------+-------------------+
+1 row in set (0.00 sec)
+
+
+// 查看master端口号
+#docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                               NAMES
+3643ee48db6b        mysql               "docker-entrypoint.s…"   About an hour ago   Up About an hour    33060/tcp, 0.0.0.0:3340->3306/tcp   slave
+01725dbe3c43        mysql               "docker-entrypoint.s…"   14 hours ago        Up 13 hours         33060/tcp, 0.0.0.0:3339->3306/tcp   master
+
+33060/tcp, 0.0.0.0:3339->3306/tcp
+3339 为 master 的端口
+
+进入容器修改 slave 的读写权限
+docker exec -it 3643ee48db6b /bin/sh
+
+mysql -uroot -p
+
+// mysql shell
+// 用户名：root
+// 密码：root
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+
+# 设置主从配置
+mysql> change master to master_host='172.17.0.10', master_user='root',master_password='root', master_log_file='mysql-bin.000001',master_log_pos=391,master_port=3339;
+Query OK, 0 rows affected, 2 warnings (0.04 sec)
+
+master_host=’x.x.x.x’ // 这里填 master 主机 ip (这次是用的主机内网id,如果是跨网应该是用
+master_log_file=’mysql-bin.000003’, // 这里填写 File 的值
+master_log_pos=1338,// 这里填写 Position 的值。
+master_port,// master端口号
+
+mysql> show warnings;
++-------+------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Level | Code | Message                                                                                                                                                                                                                                                                              |
++-------+------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Note  | 1759 | Sending passwords in plain text without SSL/TLS is extremely insecure.                                                                                                                                                                                                               |
+| Note  | 1760 | Storing MySQL user name or password information in the master info repository is not secure and is therefore not recommended. Please consider using the USER and PASSWORD connection options for START SLAVE; see the 'START SLAVE Syntax' in the MySQL Manual for more information. |
++-------+------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+2 rows in set (0.00 sec)
+
+解决方法:
+change master to master_host='172.17.0.10', master_log_file='mysql-bin.000001',master_log_pos=391,master_port=3339;
+start replica user='root' password='root';
+
+mysql> show replica status;
++----------------------+-------------+-------------+-------------+---------------+------------------+---------------------+-------------------------------+---------------+-----------------------+--------------------+---------------------+-----------------+---------------------+--------------------+------------------------+-------------------------+-----------------------------+------------+------------+--------------+---------------------+-----------------+-----------------+----------------+---------------+--------------------+--------------------+--------------------+-----------------+-------------------+----------------+-----------------------+-------------------------------+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------+----------------+-----------------------------+------------------+-------------+-------------------------+-----------+---------------------+--------------------------------------------------------+--------------------+-------------+-------------------------+--------------------------+----------------+--------------------+--------------------+-------------------+---------------+----------------------+--------------+--------------------+------------------------+-----------------------+-------------------+
+| Replica_IO_State     | Source_Host | Source_User | Source_Port | Connect_Retry | Source_Log_File  | Read_Source_Log_Pos | Relay_Log_File                | Relay_Log_Pos | Relay_Source_Log_File | Replica_IO_Running | Replica_SQL_Running | Replicate_Do_DB | Replicate_Ignore_DB | Replicate_Do_Table | Replicate_Ignore_Table | Replicate_Wild_Do_Table | Replicate_Wild_Ignore_Table | Last_Errno | Last_Error | Skip_Counter | Exec_Source_Log_Pos | Relay_Log_Space | Until_Condition | Until_Log_File | Until_Log_Pos | Source_SSL_Allowed | Source_SSL_CA_File | Source_SSL_CA_Path | Source_SSL_Cert | Source_SSL_Cipher | Source_SSL_Key | Seconds_Behind_Source | Source_SSL_Verify_Server_Cert | Last_IO_Errno | Last_IO_Error                                                                                                                                                                                    | Last_SQL_Errno | Last_SQL_Error | Replicate_Ignore_Server_Ids | Source_Server_Id | Source_UUID | Source_Info_File        | SQL_Delay | SQL_Remaining_Delay | Replica_SQL_Running_State                              | Source_Retry_Count | Source_Bind | Last_IO_Error_Timestamp | Last_SQL_Error_Timestamp | Source_SSL_Crl | Source_SSL_Crlpath | Retrieved_Gtid_Set | Executed_Gtid_Set | Auto_Position | Replicate_Rewrite_DB | Channel_Name | Source_TLS_Version | Source_public_key_path | Get_Source_public_key | Network_Namespace |
++----------------------+-------------+-------------+-------------+---------------+------------------+---------------------+-------------------------------+---------------+-----------------------+--------------------+---------------------+-----------------+---------------------+--------------------+------------------------+-------------------------+-----------------------------+------------+------------+--------------+---------------------+-----------------+-----------------+----------------+---------------+--------------------+--------------------+--------------------+-----------------+-------------------+----------------+-----------------------+-------------------------------+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------+----------------+-----------------------------+------------------+-------------+-------------------------+-----------+---------------------+--------------------------------------------------------+--------------------+-------------+-------------------------+--------------------------+----------------+--------------------+--------------------+-------------------+---------------+----------------------+--------------+--------------------+------------------------+-----------------------+-------------------+
+| Connecting to master | 172.17.0.10 | root        |        3339 |            60 | mysql-bin.000001 |                 391 | 3643ee48db6b-relay-bin.000001 |             4 | mysql-bin.000001      | Connecting         | Yes                 |                 |                     |                    |                        |                         |                             |          0 |            |            0 |                 391 |             156 | None            |                |             0 | No                 |                    |                    |                 |                   |                |                  NULL | No                            |          2061 | error connecting to master 'root@172.17.0.10:3339' - retry-time: 60 retries: 1 message: Authentication plugin 'caching_sha2_password' reported error: Authentication requires secure connection. |              0 |                |                             |                0 |             | mysql.slave_master_info |         0 |                NULL | Slave has read all relay log; waiting for more updates |              86400 |             | 201201 05:07:25         |                          |                |                    |                    |                   |             0 |                      |              |                    |                        |                     0 |                   |
++----------------------+-------------+-------------+-------------+---------------+------------------+---------------------+-------------------------------+---------------+-----------------------+--------------------+---------------------+-----------------+---------------------+--------------------+------------------------+-------------------------+-----------------------------+------------+------------+--------------+---------------------+-----------------+-----------------+----------------+---------------+--------------------+--------------------+--------------------+-----------------+-------------------+----------------+-----------------------+-------------------------------+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------+----------------+-----------------------------+------------------+-------------+-------------------------+-----------+---------------------+--------------------------------------------------------+--------------------+-------------+-------------------------+--------------------------+----------------+--------------------+--------------------+-------------------+---------------+----------------------+--------------+--------------------+------------------------+-----------------------+-------------------+
+
+Replica_IO_Running:connecting 说明没有连接上主库
+Last_IO_Error:信息
+Authentication plugin 'caching_sha2_password' reported error: Authentication requires secure connection.
+原因:
+MySQL8.0.11版本默认的认证方式是caching_sha2_password ，而在MySQL5.7版本则为mysql_native_password
+
+进入在主库sh和从库同时修改
+ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'root';
+flush privileges;
+或者在my.int里面加入一段
+default_authentication_plugin=mysql_native_password
+
+mysql> show replica status;
++----------------------------------+-------------+-------------+-------------+---------------+------------------+---------------------+-------------------------------+---------------+-----------------------+--------------------+---------------------+-----------------+---------------------+--------------------+------------------------+-------------------------+-----------------------------+------------+------------+--------------+---------------------+-----------------+-----------------+----------------+---------------+--------------------+--------------------+--------------------+-----------------+-------------------+----------------+-----------------------+-------------------------------+---------------+---------------+----------------+----------------+-----------------------------+------------------+--------------------------------------+-------------------------+-----------+---------------------+--------------------------------------------------------+--------------------+-------------+-------------------------+--------------------------+----------------+--------------------+--------------------+-------------------+---------------+----------------------+--------------+--------------------+------------------------+-----------------------+-------------------+
+| Replica_IO_State                 | Source_Host | Source_User | Source_Port | Connect_Retry | Source_Log_File  | Read_Source_Log_Pos | Relay_Log_File                | Relay_Log_Pos | Relay_Source_Log_File | Replica_IO_Running | Replica_SQL_Running | Replicate_Do_DB | Replicate_Ignore_DB | Replicate_Do_Table | Replicate_Ignore_Table | Replicate_Wild_Do_Table | Replicate_Wild_Ignore_Table | Last_Errno | Last_Error | Skip_Counter | Exec_Source_Log_Pos | Relay_Log_Space | Until_Condition | Until_Log_File | Until_Log_Pos | Source_SSL_Allowed | Source_SSL_CA_File | Source_SSL_CA_Path | Source_SSL_Cert | Source_SSL_Cipher | Source_SSL_Key | Seconds_Behind_Source | Source_SSL_Verify_Server_Cert | Last_IO_Errno | Last_IO_Error | Last_SQL_Errno | Last_SQL_Error | Replicate_Ignore_Server_Ids | Source_Server_Id | Source_UUID                          | Source_Info_File        | SQL_Delay | SQL_Remaining_Delay | Replica_SQL_Running_State                              | Source_Retry_Count | Source_Bind | Last_IO_Error_Timestamp | Last_SQL_Error_Timestamp | Source_SSL_Crl | Source_SSL_Crlpath | Retrieved_Gtid_Set | Executed_Gtid_Set | Auto_Position | Replicate_Rewrite_DB | Channel_Name | Source_TLS_Version | Source_public_key_path | Get_Source_public_key | Network_Namespace |
++----------------------------------+-------------+-------------+-------------+---------------+------------------+---------------------+-------------------------------+---------------+-----------------------+--------------------+---------------------+-----------------+---------------------+--------------------+------------------------+-------------------------+-----------------------------+------------+------------+--------------+---------------------+-----------------+-----------------+----------------+---------------+--------------------+--------------------+--------------------+-----------------+-------------------+----------------+-----------------------+-------------------------------+---------------+---------------+----------------+----------------+-----------------------------+------------------+--------------------------------------+-------------------------+-----------+---------------------+--------------------------------------------------------+--------------------+-------------+-------------------------+--------------------------+----------------+--------------------+--------------------+-------------------+---------------+----------------------+--------------+--------------------+------------------------+-----------------------+-------------------+
+| Waiting for master to send event | 172.17.0.10 | root        |        3339 |            60 | mysql-bin.000001 |                 840 | 3643ee48db6b-relay-bin.000002 |           773 | mysql-bin.000001      | Yes                | Yes                 |                 |                     |                    |                        |                         |                             |          0 |            |            0 |                 840 |             989 | None            |                |             0 | No                 |                    |                    |                 |                   |                |                     0 | No                            |             0 |               |              0 |                |                             |              100 | eccda2a1-331a-11eb-bd09-0242ac120002 | mysql.slave_master_info |         0 |                NULL | Slave has read all relay log; waiting for more updates |              86400 |             |                         |                          |                |                    |                    |                   |             0 |                      |              |                    |                        |                     0 |                   |
++----------------------------------+-------------+-------------+-------------+---------------+------------------+---------------------+-------------------------------+---------------+-----------------------+--------------------+---------------------+-----------------+---------------------+--------------------+------------------------+-------------------------+-----------------------------+------------+------------+--------------+---------------------+-----------------+-----------------+----------------+---------------+--------------------+--------------------+--------------------+-----------------+-------------------+----------------+-----------------------+-------------------------------+---------------+---------------+----------------+----------------+-----------------------------+------------------+--------------------------------------+-------------------------+-----------+---------------------+--------------------------------------------------------+--------------------+-------------+-------------------------+--------------------------+----------------+--------------------+--------------------+-------------------+---------------+----------------------+--------------+--------------------+------------------------+-----------------------+-------------------+
+1 row in set (0.00 sec)
+
+Replica_IO_Running:Yes
+Replica_SQL_Running:Yes
+成功
+
+
+
+
+----------------------------------------------------------测试主从复制---------------------------------------------------
+#登录主库
+
+mysql> create database test;
+Query OK, 1 row affected (0.02 sec)
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
+| test               |
++--------------------+
+5 rows in set (0.00 sec)
+
+mysql> use test
+Database changed
+mysql> create table user(id int(3), name char(10));
+Query OK, 0 rows affected, 1 warning (0.07 sec)
+
+mysql> insert into user values(1,'linkuan');
+Query OK, 1 row affected (0.02 sec)
+
+mysql> select *from user;
++------+---------+
+| id   | name    |
++------+---------+
+|    1 | linkuan |
++------+---------+
+1 row in set (0.00 sec)
+
+登录从库
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
+| test               |
++--------------------+
+5 rows in set (0.00 sec)
+
+mysql> use test
+Database changed
+mysql> select *from user;
++------+---------+
+| id   | name    |
++------+---------+
+|    1 | linkuan |
++------+---------+
+1 row in set (0.00 sec)

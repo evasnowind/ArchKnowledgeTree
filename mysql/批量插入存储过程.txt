@@ -1,0 +1,113 @@
+CREATE DEFINER=`mail`@`%` PROCEDURE `order_data_batch_init2`( IN `batch_num` INT )
+BEGIN
+DECLARE
+	i INT;
+DECLARE
+	num INT;
+DECLARE
+	SQL_FOR_INSERT LONGBLOB;
+
+SET num = 0;
+
+SET i = 0;
+WHILE
+	i < 1000000 DO
+IF
+i % batch_num = 0 THEN
+START TRANSACTION;
+
+SET SQL_FOR_INSERT = concat( 'insert into order_info(order_code, order_status,', 'create_time, payment_time, delivery_time,', 'expected_time, arrive_time, complete_time,', 'merchant_id, merchant_name, customer_id,', 'customer_name) values ' );
+
+SET SQL_FOR_INSERT = concat(
+	SQL_FOR_INSERT,
+	'(',
+	concat( '''', '234234023423', i, '''' ),
+	',',
+	'''1''',
+	',',
+	1606977018421,
+	',',
+	1606977018421,
+	',',
+	1606977018421,
+	',',
+	1606977018421,
+	',',
+	1606977018421,
+	',',
+	1606977018421,
+	',',
+	concat( '''', i, '''' ),
+	',',
+	concat( '''', 'merchant_name', i, '''' ),
+	',',
+	concat( '''', i, '''' ),
+	',',
+	concat( '''', 'customer_name', i, '''' ),
+	')' 
+);
+ELSE 
+	SET SQL_FOR_INSERT = concat(
+		SQL_FOR_INSERT,
+		', (',
+		concat( '''', '234234023423', i, '''' ),
+		',',
+		'''1''',
+		',',
+		1606977018421,
+		',',
+		1606977018421,
+		',',
+		1606977018421,
+		',',
+		1606977018421,
+		',',
+		1606977018421,
+		',',
+		1606977018421,
+		',',
+		concat( '''', i, '''' ),
+		',',
+		concat( '''', 'merchant_name', i, '''' ),
+		',',
+		concat( '''', i, '''' ),
+		',',
+		concat( '''', 'customer_name', i, '''' ),
+		')' 
+	);
+
+END IF;
+IF
+	( ( i + 1 ) % batch_num = 0 ) THEN
+		
+		SET @SQL = SQL_FOR_INSERT;
+	PREPARE stmt 
+	FROM
+		@SQL;-- 预处理动态sql语句
+	EXECUTE stmt;-- 执行sql语句
+	DEALLOCATE PREPARE stmt;-- 释放prepare
+	COMMIT;
+	
+	SET num = num + 1;
+	
+	ELSEIF ( i = 999999 ) THEN
+	
+	SET @SQL = SQL_FOR_INSERT;
+	PREPARE stmt 
+	FROM
+		@SQL;-- 预处理动态sql语句
+	EXECUTE stmt;-- 执行sql语句
+	DEALLOCATE PREPARE stmt;-- 释放prepare
+	COMMIT;
+	
+	SET num = num + 1;
+	
+END IF;
+
+SET i = i + 1;
+
+END WHILE;
+SELECT
+	num;
+
+END
