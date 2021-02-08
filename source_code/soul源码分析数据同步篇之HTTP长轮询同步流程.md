@@ -61,21 +61,23 @@ soul:
 
 一般客户端、服务端之间数据同步，无非推、拉两种模型。官方这张图清晰的指出`HTTP`长轮询是拉模式，另外的`WebSocket`和`ZooKeeper`则是推模式。
 
-`HTTP`长轮询机制借鉴`Apllo`、`Nacos`等框架的思想，基本流程：
+`HTTP`长轮询机制借鉴`Apllo`、`Nacos`等框架的思想，网关`soul-bootstrap`会发`HTTP`查询请求给`soul-admin`，查询目前最新的配置，该查询请求超时时间为90s，即读取配置信息时`soul-bootstrap`最多等待就是90s。而`soul-admin`收到查询请求后，将会异步处理，先将其放到阻塞队列中，`soul-admin`会额外创建一个60s后执行的调度任务，该任务会从阻塞队列中拿到这个请求、进行处理，保证请求肯定得到响应。另一方面，如果在60s内，管理员在`soul-admin`中更改了配置，`soul-admin`会挨个移除阻塞队列中的长轮询请求、响应数据，并告知哪个`group`发生了变更，网关`soul-bootstrap`还需要额外发起请求更新对应`group`的数据。
 
-```sequence
-`soul-web` -> soul-admin : 
-```
+知道上面信息后，再回过头来看官网这张图，是不是更清晰一些了？
 
+![](images/soul-http-long-polling.png)
 
+> 注意：因为soul一直在迭代中，官网文档、图可能有滞后，建议一切以代码为准。
 
-
+这个是思路，我们接下来分析代码，会更清晰一些。
 
 ## HTTP长轮询同步流程源码分析
 
 ### soul-admin源码分析
 
 #### 从日志分析
+
+我个人感觉，学习开源框架源码，主要就是看官方文档、看日志输出来寻找蛛丝马迹、还有就是看初始化过程的代码。
 
 首先，还是看日志信息：
 
@@ -91,143 +93,302 @@ soul:
 ......
 ```
 
-那我们基本就可以从上面日志基本可以确定，需要看`AbstractDataChangedListener`、`HttpLongPollingDataChangedListener`。
+那我们基本就可以从上面日志基本可以确定，需要看`AbstractDataChangedListener`、`HttpLongPollingDataChangedListener`。看下这两个类结构、代码即可知道这里使用了`模板方法`设计模式，主要流程由`AbstractDataChangedListener`定义，`HttpLongPollingDataChangedListener`则实现一些细节逻辑。
 
+![](images/soul-http-long-polling-listener-class-diagram.png)
 
-
-
-
-### soul-admin源码分析
-
-
+有关细节逻辑后面分析，我们接下来从初始化过程验证一下。
 
 #### 从soul-admin初始化过程分析
 
-`soul-admin`初始化类`DataSyncConfiguration`（从包名一般能猜到，初始化相关代码一般都会放到`config`包里，如果你没有这样做，得反思一下~.~），可以看到涉及`zookeeper`同步的代码如下：
+`soul-admin`初始化类`DataSyncConfiguration`中可以看到涉及`HTTP`长轮询同步的代码如下：
 
 ```java
 @Configuration
 public class DataSyncConfiguration {
     ......
         
-	@Configuration
-    @ConditionalOnProperty(prefix = "soul.sync.zookeeper", name = "url")
-    @Import(ZookeeperConfiguration.class)
-    static class ZookeeperListener {
-	
+    @Configuration
+    @ConditionalOnProperty(name = "soul.sync.http.enabled", havingValue = "true")
+    @EnableConfigurationProperties(HttpSyncProperties.class)
+    static class HttpLongPollingListener {
         @Bean
-        @ConditionalOnMissingBean(ZookeeperDataChangedListener.class)
-        public DataChangedListener zookeeperDataChangedListener(final ZkClient zkClient) {
-            return new ZookeeperDataChangedListener(zkClient);
-        }
-
-        @Bean
-        @ConditionalOnMissingBean(ZookeeperDataInit.class)
-        public ZookeeperDataInit zookeeperDataInit(final ZkClient zkClient, final SyncDataService syncDataService){
-            return new ZookeeperDataInit(zkClient, syncDataService);
+        @ConditionalOnMissingBean(HttpLongPollingDataChangedListener.class)
+        public HttpLongPollingDataChangedListener httpLongPollingDataChangedListener(final HttpSyncProperties httpSyncProperties) {
+            return new HttpLongPollingDataChangedListener(httpSyncProperties);
         }
     }
     ......
 }
 ```
 
-可以看到只有配置了`soul.sync.zookeeper`属性，才会实例化`ZookeeperListener`， 而`ZookeeperListener`又依赖于`ZookeeperConfiguration`，`ZookeeperConfiguration`只是根据配置文件中的`zookeeper`地址、session超时时间、连接超时时间创建出一个`zkClient`供后续调用。
+可以看到只有配置了`soul.sync.http.enabled`属性，才会实例化`HttpLongPollingDataChangedListener`。那结合上述`soul`官网中提到的长轮询机制，我们可以想见，这个`HttpLongPollingDataChangedListener`就应该包含调度任务、阻塞队列、对于请求的处理等逻辑。
 
-继续分析，`ZookeeperListener`中创建的`ZookeeperDataInit`，看源码可以发现，该类利用了`Spring Boot`的`CommandLineRunner`接口，当所有对象初始化之后，将会初始化插件、权限、元数据在`zookeeper`中的路径，同时判断`zookeeper`中对应路径中是否存在节点，如果插件、权限、元数据这3者对应的节点都不存在，则进行一次全量同步操作(` syncDataService.syncAll`)：
+##### HttpLongPollingDataChangedListener分析
 
-```java
-public class ZookeeperDataInit implements CommandLineRunner {
-   
-    private final ZkClient zkClient;
-    private final SyncDataService syncDataService;
-    ......
+由于采用了`模板方法`设计模式，我们要对`HttpLongPollingDataChangedListener`分析，必须先把父类`AbstractDataChangedListener`逻辑搞清。
 
-    @Override
-    public void run(final String... args) {
-        String pluginPath = ZkPathConstants.PLUGIN_PARENT;
-        String authPath = ZkPathConstants.APP_AUTH_PARENT;
-        String metaDataPath = ZkPathConstants.META_DATA;
-        //zk中没有对应节点，则进行全量同步操作、更新到zk中
-        if (!zkClient.exists(pluginPath) && !zkClient.exists(authPath) && !zkClient.exists(metaDataPath)) {
-            syncDataService.syncAll(DataEventTypeEnum.REFRESH);
-        }
-    }
-    ......
-}
-
-```
-
-全量同步方法会从数据库读取插件、权限、元数据，将其利用`Spring Event`机制发布出去：
+`AbstractDataChangedListener`主要代码如下（略去了结构重复的n多内容）：
 
 ```java
-@Service("syncDataService")
-public class SyncDataServiceImpl implements SyncDataService {
+@Slf4j
+@SuppressWarnings("all")
+public abstract class AbstractDataChangedListener implements DataChangedListener, InitializingBean {
+	 //常量缓存
+     protected static final ConcurrentMap<String, ConfigDataCache> CACHE = new ConcurrentHashMap<>();
+    //AppAuthService, PluginService, RuleService, SelectorService, MetaDataService的引用，用于读写数据库
     ......
-    @Override
-    public boolean syncAll(final DataEventTypeEnum type) {
-        appAuthService.syncData();
-        List<PluginData> pluginDataList = pluginService.listAll();
-        eventPublisher.publishEvent(new DataChangedEvent(ConfigGroupEnum.PLUGIN, type, pluginDataList));
-        List<SelectorData> selectorDataList = selectorService.listAll();
-        eventPublisher.publishEvent(new DataChangedEvent(ConfigGroupEnum.SELECTOR, type, selectorDataList));
-        List<RuleData> ruleDataList = ruleService.listAll();
-        eventPublisher.publishEvent(new DataChangedEvent(ConfigGroupEnum.RULE, type, ruleDataList));
-        metaDataService.syncData();
-        return true;
-    }
-    ......
-}
-```
-
-`ZookeeperListener`中创建的另一个对象，`ZookeeperDataChangedListener`将根据上面的数据更新时间，更新`zookeeper`中的数据：
-
-```java
-public class ZookeeperDataChangedListener implements DataChangedListener {
-
-    private final ZkClient zkClient;
-	......
-
-    @Override
-    public void onAppAuthChanged(final List<AppAuthData> changed, final DataEventTypeEnum eventType) {
-        ......
-    }
-
-    @SneakyThrows
-    @Override
-    public void onMetaDataChanged(final List<MetaData> changed, final DataEventTypeEnum eventType) {
-		......
-    }
-
-    @Override
-    public void onPluginChanged(final List<PluginData> changed, final DataEventTypeEnum eventType) {
-    	......
-    }
-
+ 
+    //实现DataChangedListener接口，此处仅截取了selector相关，实际还有onAppAuthChanged、onPluginChanged等实现。实现思路跟下面selector这个完全一致，都是在执行完刷新对应缓存后、调用对应的afterXxxChanged方法。
     @Override
     public void onSelectorChanged(final List<SelectorData> changed, final DataEventTypeEnum eventType) {
+        if (CollectionUtils.isEmpty(changed)) {
+            return;
+        }
+        this.updateSelectorCache();
+        this.afterSelectorChanged(changed, eventType);
+    }
+	//更新selector缓存后，调用该方法。
+    protected void afterSelectorChanged(final List<SelectorData> changed, final DataEventTypeEnum eventType) {
     }
 
+    //InitializingBean接口，属性赋值后、初始化之前执行
     @Override
-    public void onRuleChanged(final List<RuleData> changed, final DataEventTypeEnum eventType) {
-       	......
+    public final void afterPropertiesSet() {
+        updateAppAuthCache();
+        updatePluginCache();
+        updateRuleCache();
+        updateSelectorCache();
+        updateMetaDataCache();
+        afterInitialize();
     }
-    ......
+	//模板方法
+    protected abstract void afterInitialize();
+	//更新缓存
+    protected <T> void updateCache(final ConfigGroupEnum group, final List<T> data) {
+        String json = GsonUtils.getInstance().toJson(data);
+        ConfigDataCache newVal = new ConfigDataCache(group.name(), json, Md5Utils.md5(json), System.currentTimeMillis());
+        ConfigDataCache oldVal = CACHE.put(newVal.getGroup(), newVal);
+        log.info("update config cache[{}], old: {}, updated: {}", group, oldVal, newVal);
+    }
+	//更新selector、rule、plugin、appAuth、metadata缓存的工具方法
+  	.......
 }
 ```
 
-当然，此处看上去这个`ZookeeperDataChangedListener`好像并没有监听`DataChangedEvent`这个事件，但我们找找`DataChangedEvent`的引用关系，可以发现是`DataChangedEventDispatcher`这个类在监听事件、然后将该事件分发给对应的listener。此处逻辑可以参考上一篇[soul源码分析数据同步篇之WebSocket同步流程](https://blog.csdn.net/evasnowind/article/details/113333185) 。
+可以看到`AbstractDataChangedListener`主要是实现`DataChangedListener`接口，同时利用`模板方法`设计模式，提供了扩展的余地，在数据变化时刷新缓存、调用对应的模板方法。
 
-至此我们基本将`soul-admin`整体流程串起来了。
+之前也分析过，在`soul-admin`中利用`Spring`事件监听机制，收到`DataChangedEvent`事件后会将其发给对应的`listener`，由`listener`进一步处理：
 
-#### soul-admin整体流程
+```mermaid
+graph LR
+XxxxController --> XxxxService --> |DataChangeEvent|DataChangedEventDispatcher -->|更新后的数据| WebsocketDataChangedListener & ZookeeperDataChangedListener & NacosDataChangedListener & AbstractDataChangedListener
+XxxxService --> 持久化
+```
 
-首先再小结下初始化过程，涉及到的类如下图所示，其中`ZookeeperConfiguration`利用`Spring Import`机制先执行、创建出`zkClient`之后，然后`ZookeeperDataInit`才能实例化。
+那么在`HTTP`长轮询这里，流程就是：
 
-数据更新时，利用`Spring Event`机制，需要更新数据时只需要发布一个`DataChangeEvent`即可，该事件将会由`DataChangedEventDispatcher`统一处理，`DataChangedEventDispatcher`将会根据事件中的更新类型，调用对应`listener`，在`zookeeper`同步这里就是调用`ZookeeperDataChangedListener`对应的方法进行处理。
+```mermaid
+graph TB
+DataChangedEventDispatcher --> |更新后的数据|AbstractDataChangedListener刷新缓存等模板方法 --> |更新后的数据|HttpLongPollingDataChangedListener扩展方法
+```
+
+上图中提到的扩展方法就是利用`AbstractDataChangedListener`提供的`afterPluginChanged`、`afterRuleChanged`等方法，实现`HTTP`长轮询逻辑、嵌入到已有的处理流程中。
+
+还是先看下源码：
+
+```java
+@Slf4j
+@SuppressWarnings("all")
+public class HttpLongPollingDataChangedListener extends AbstractDataChangedListener {
+	.......
+    private static final ReentrantLock LOCK = new ReentrantLock();
+    private final BlockingQueue<LongPollingClient> clients;
+    private final ScheduledExecutorService scheduler;
+    private final HttpSyncProperties httpSyncProperties;
+
+    public HttpLongPollingDataChangedListener(final HttpSyncProperties httpSyncProperties) {
+        this.clients = new ArrayBlockingQueue<>(1024);
+        this.scheduler = new ScheduledThreadPoolExecutor(1,
+                SoulThreadFactory.create("long-polling", true));
+        this.httpSyncProperties = httpSyncProperties;
+    }
+
+    //添加一个定时任务，定时读取数据库数据、写入到本地缓存中
+    @Override
+    protected void afterInitialize() {
+        long syncInterval = httpSyncProperties.getRefreshInterval().toMillis();
+        // Periodically check the data for changes and update the cache
+        scheduler.scheduleWithFixedDelay(() -> {
+            log.info("http sync strategy refresh config start.");
+            try {
+                this.refreshLocalCache();
+                log.info("http sync strategy refresh config success.");
+            } catch (Exception e) {
+                log.error("http sync strategy refresh config error!", e);
+            }
+        }, syncInterval, syncInterval, TimeUnit.MILLISECONDS);
+        log.info("http sync strategy refresh interval: {}ms", syncInterval);
+    }
+
+    /*
+    缓存中保存的是： group --> ConfigDataCache(包含name, json数据，md5, 存入缓存的时间错)
+    group即RULE,PLUGIN这些名字，参见ConfigGroupEnum
+    */
+    private void refreshLocalCache() {
+        this.updateAppAuthCache();
+        this.updatePluginCache();
+        this.updateRuleCache();
+        this.updateSelectorCache();
+        this.updateMetaDataCache();
+    }
+
+    /*
+    关键代码1：获取请求信息，比较
+    */
+    public void doLongPolling(final HttpServletRequest request, final HttpServletResponse response) {
+        // compareChangedGroup 会比较md5与时间戳，如果有不一样的，则单独拿出来、立即响应
+        List<ConfigGroupEnum> changedGroup = compareChangedGroup(request);
+        String clientIp = getRemoteIp(request);
+        if (CollectionUtils.isNotEmpty(changedGroup)) {
+            //立即响应，此处是使用HttpServletResponse 写入数据
+            this.generateResponse(response, changedGroup);
+            log.info("send response with the changed group, ip={}, group={}", clientIp, changedGroup);
+            return;
+        }
+        /*
+        监听配置变化，此处利用Servlet 3.0的异步处理机制，将当前请求的AsyncContext对象放到LongPollingClient中，
+        然后交给线程池异步执行LongPollingClient，doLongPolling自己不会阻塞。
+       	此处可以参考 https://blog.csdn.net/whereismatrix/article/details/52864554  这篇文章了解下Servlet 3.0的异步处理机制
+        */
+        final AsyncContext asyncContext = request.startAsync();
+        asyncContext.setTimeout(0L);
+        // 提交到线程池，异步处理。HttpConstants.SERVER_MAX_HOLD_TIMEOUT 设置了超时时间60s
+        scheduler.execute(new LongPollingClient(asyncContext, clientIp, HttpConstants.SERVER_MAX_HOLD_TIMEOUT));
+    }
+
+    /*关键代码2：父类onPluginChanged方法执行（刷新缓存）后，将调用此处的afterPluginChanged。此处是新建一个DataChangeTask对象加入到处理调度任务的线程池中。
+    DataChangeTask会将阻塞队列clients中的所有待处理请求弹出、返回更新后的数据。这个逻辑参见DataChangeTask类实现。
+    */
+    @Override
+    protected void afterPluginChanged(final List<PluginData> changed, final DataEventTypeEnum eventType) {
+        scheduler.execute(new DataChangeTask(ConfigGroupEnum.PLUGIN));
+    }
+    //此处省略afterMetaDataChanged afterAppAuthChanged等结构完全相同的代码
+    ......
 
 
+    private List<ConfigGroupEnum> compareChangedGroup(final HttpServletRequest request) {
+        List<ConfigGroupEnum> changedGroup = new ArrayList<>(ConfigGroupEnum.values().length);
+        for (ConfigGroupEnum group : ConfigGroupEnum.values()) {
+            // md5,lastModifyTime
+            String[] params = StringUtils.split(request.getParameter(group.name()), ',');
+            if (params == null || params.length != 2) {
+                throw new SoulException("group param invalid:" + request.getParameter(group.name()));
+            }
+            String clientMd5 = params[0];
+            long clientModifyTime = NumberUtils.toLong(params[1]);
+            ConfigDataCache serverCache = CACHE.get(group.name());
+            // do check.
+            if (this.checkCacheDelayAndUpdate(serverCache, clientMd5, clientModifyTime)) {
+                changedGroup.add(group);
+            }
+        }
+        return changedGroup;
+    }
+    //省略部分工具方法
+    ......
 
+    class DataChangeTask implements Runnable {
+        private final ConfigGroupEnum groupKey;
+        private final long changeTime = System.currentTimeMillis();
 
+        DataChangeTask(final ConfigGroupEnum groupKey) {
+            this.groupKey = groupKey;
+        }
+
+        /*
+        关键代码3：
+        有数据更新（plugin, selector等），则立即从阻塞队列拿出正等待处理的请求、立即返回响应给客户端
+        */
+        @Override
+        public void run() {
+            for (Iterator<LongPollingClient> iter = clients.iterator(); iter.hasNext();) {
+                LongPollingClient client = iter.next();
+                iter.remove();
+                client.sendResponse(Collections.singletonList(groupKey));
+                log.info("send response with the changed group,ip={}, group={}, changeTime={}", client.ip, groupKey, changeTime);
+            }
+        }
+    }
+
+    class LongPollingClient implements Runnable {
+		//利用Servlet 3.0 异步处理机制，利用AsyncContext拿到HttpServletRequest， HttpServletResponse，以便响应客户端请求
+        private final AsyncContext asyncContext;
+        private final String ip;
+        private final long timeoutTime;
+        private Future<?> asyncTimeoutFuture;
+
+        LongPollingClient(final AsyncContext ac, final String ip, final long timeoutTime) {
+            this.asyncContext = ac;
+            this.ip = ip;
+            this.timeoutTime = timeoutTime;
+        }
+
+        @Override
+        public void run() {
+            /*
+            关键代码4：
+			scheduler执行本任务时，将会执行：
+			1. 加入一个默认60s后执行的调度任务加入scheduler，该任务：
+				1.1 从阻塞队列clients中移除当前LongPollingClient对象
+				1.2 发送响应给客户端（即60s后自动从阻塞队列移除、并响应客户端的逻辑）
+			2. 将当前LongPollingClient对象保存到阻塞队列clients中
+            */
+            this.asyncTimeoutFuture = scheduler.schedule(() -> {
+                clients.remove(LongPollingClient.this);
+                List<ConfigGroupEnum> changedGroups = compareChangedGroup((HttpServletRequest) asyncContext.getRequest());
+                sendResponse(changedGroups);
+            }, timeoutTime, TimeUnit.MILLISECONDS);
+            clients.add(this);
+        }
+
+        void sendResponse(final List<ConfigGroupEnum> changedGroups) {
+            // cancel scheduler
+            if (null != asyncTimeoutFuture) {
+                asyncTimeoutFuture.cancel(false);
+            }
+            generateResponse((HttpServletResponse) asyncContext.getResponse(), changedGroups);
+            //可以透过AsyncContext的getRequest() 、 getResponse()方法取得Request、Response对象，此次对客户端的响应将暂缓至调用AsyncContext的complete()方法或dispatch()为止，前者表示回应完成，后者表示将响应调派给指定的URL 。
+            asyncContext.complete();
+        }
+    }
+}
+```
+
+#### 小结
+
+源码分析参见上面一小节，尤其注意体会上面注释中的`关键代码1`、`关键代码2`、`关键代码3`、`关键代码4`，这些地方需要与官方这张图比较就能理解了：![](images/soul-http-long-polling.png)
+
+这里为便于理解，我画了一张序列图：
+
+```mermaid
+sequenceDiagram
+    loop long polling
+        客户端->>HttpLongPollingDataChangedListener: 长轮询请求
+        HttpLongPollingDataChangedListener ->>HttpLongPollingDataChangedListener: 检查配置是否有更新 
+        alt 配置信息有变化
+            HttpLongPollingDataChangedListener-->>客户端: 有更新则立即返回
+        else 配置信息暂时没有变化
+            HttpLongPollingDataChangedListener ->>scheduler线程池: 提交任务异步处理请求
+            scheduler线程池 ->>阻塞队列: 添加异步响应逻辑LongPollingClient到阻塞队列
+            scheduler线程池 -->> 客户端: 添加调度任务，60s后将LongPollingClient从阻塞队列中移除，并响应客户端
+            阻塞队列 -->> 客户端: 配置信息有更新时，立即移除所有LongPollingClient，并响应，以便立即将数据变化同步给客户端
+        end
+    end
+```
+
+这下应该就比较清楚了。
 
 ### soul-bootstrap源码分析
 
@@ -247,147 +408,86 @@ public class ZookeeperDataChangedListener implements DataChangedListener {
 ......
 ```
 
-此处相对就好看一些，从`ZookeeperSyncDataConfiguration : you use zookeeper sync soul data`这条日志直接可以定位到`soul-bootstrap`中的启动过程中使用`zookeeper`的位置:
+显然，初始化是在`HttpSyncDataConfiguration`中，而这个类创建了`HttpSyncDataService`实例，不断轮询的逻辑就在`HttpSyncDataService`中：
 
 ```java
-@Configuration
-//ZookeeperSyncDataService存在时，才会实例化ZookeeperSyncDataConfiguration
-@ConditionalOnClass(ZookeeperSyncDataService.class)
-//配置了soul.sync.zookeeper.url属性，才会实例化ZookeeperSyncDataConfiguration
-@ConditionalOnProperty(prefix = "soul.sync.zookeeper", name = "url")
-//属性将放到ZookeeperConfig中，方便使用
-@EnableConfigurationProperties(ZookeeperConfig.class)
-@Slf4j
-public class ZookeeperSyncDataConfiguration {
-	//初始化ZookeeperSyncDataService
-    @Bean
-    public SyncDataService syncDataService(final ObjectProvider<ZkClient> zkClient, final ObjectProvider<PluginDataSubscriber> pluginSubscriber,
-                                           final ObjectProvider<List<MetaDataSubscriber>> metaSubscribers, final ObjectProvider<List<AuthDataSubscriber>> authSubscribers) {
-        log.info("you use zookeeper sync soul data.......");
-        return new ZookeeperSyncDataService(zkClient.getIfAvailable(), pluginSubscriber.getIfAvailable(),
-                metaSubscribers.getIfAvailable(Collections::emptyList), authSubscribers.getIfAvailable(Collections::emptyList));
-    }
+public class HttpSyncDataService implements SyncDataService, AutoCloseable {
 
-    //初始化zookeeper客户端
-    @Bean
-    public ZkClient zkClient(final ZookeeperConfig zookeeperConfig) {
-        return new ZkClient(zookeeperConfig.getUrl(), zookeeperConfig.getSessionTimeout(), zookeeperConfig.getConnectionTimeout());
-    }
-}
-```
-
-明显主要逻辑在`ZookeeperSyncDataService`中，此处截取一部分代码：
-
-```java
-public class ZookeeperSyncDataService implements SyncDataService, AutoCloseable {
-    ......
-        
-    public ZookeeperSyncDataService(final ZkClient zkClient, final PluginDataSubscriber pluginDataSubscriber,
-                                    final List<MetaDataSubscriber> metaDataSubscribers, final List<AuthDataSubscriber> authDataSubscribers) {
-        this.zkClient = zkClient;
-        //引入插件、元数据、权限相关的订阅者
-        this.pluginDataSubscriber = pluginDataSubscriber;
-        this.metaDataSubscribers = metaDataSubscribers;
-        this.authDataSubscribers = authDataSubscribers;
-        watcherData();
-        watchAppAuth();
-        watchMetaData();
+  .......
+    public HttpSyncDataService(final HttpConfig httpConfig, final PluginDataSubscriber pluginDataSubscriber,
+                               final List<MetaDataSubscriber> metaDataSubscribers, final List<AuthDataSubscriber> authDataSubscribers) {
+        this.factory = new DataRefreshFactory(pluginDataSubscriber, metaDataSubscribers, authDataSubscribers);
+        this.httpConfig = httpConfig;
+        this.serverList = Lists.newArrayList(Splitter.on(",").split(httpConfig.getUrl()));
+        this.httpClient = createRestTemplate();
+        this.start();
     }
     
-    /*
-    监听插件在zk中对应的数据。如果zk中对应节点不存在，则先创建。
-    */
-    private void watcherData() {
-        //查阅
-        final String pluginParent = ZkPathConstants.PLUGIN_PARENT;
-        List<String> pluginZKs = zkClientGetChildren(pluginParent);
-        for (String pluginName : pluginZKs) {
-            watcherAll(pluginName);
+        ......
+            
+      private void start() {
+        // It could be initialized multiple times, so you need to control that.
+        if (RUNNING.compareAndSet(false, true)) {
+            // fetch all group configs.
+            this.fetchGroupConfig(ConfigGroupEnum.values());
+            int threadSize = serverList.size();
+            this.executor = new ThreadPoolExecutor(threadSize, threadSize, 60L, TimeUnit.SECONDS,
+                    new LinkedBlockingQueue<>(),
+                    SoulThreadFactory.create("http-long-polling", true));
+            // start long polling, each server creates a thread to listen for changes.
+            this.serverList.forEach(server -> this.executor.execute(new HttpLongPollingTask(server)));
+        } else {
+            log.info("soul http long polling was started, executor=[{}]", executor);
         }
-        zkClient.subscribeChildChanges(pluginParent, (parentPath, currentChildren) -> {
-            if (CollectionUtils.isNotEmpty(currentChildren)) {
-                for (String pluginName : currentChildren) {
-                    watcherAll(pluginName);
+    }
+    
+    ......
+    
+   class HttpLongPollingTask implements Runnable {
+
+        private String server;
+
+        private final int retryTimes = 3;
+
+        HttpLongPollingTask(final String server) {
+            this.server = server;
+        }
+
+        @Override
+        public void run() {
+            while (RUNNING.get()) {
+                for (int time = 1; time <= retryTimes; time++) {
+                    try {
+                        doLongPolling(server);
+                    } catch (Exception e) {
+                        // print warnning log.
+                        if (time < retryTimes) {
+                            log.warn("Long polling failed, tried {} times, {} times left, will be suspended for a while! {}",
+                                    time, retryTimes - time, e.getMessage());
+                            ThreadUtils.sleep(TimeUnit.SECONDS, 5);
+                            continue;
+                        }
+                        // print error, then suspended for a while.
+                        log.error("Long polling failed, try again after 5 minutes!", e);
+                        ThreadUtils.sleep(TimeUnit.MINUTES, 5);
+                    }
                 }
             }
-        });
-    }
-    
-    private void watcherAll(final String pluginName) {
-        watcherPlugin(pluginName);
-        watcherSelector(pluginName);
-        watcherRule(pluginName);
-    }
-    
-    /*
-    主要工作如下
-    */
-    private void watcherPlugin(final String pluginName) {
-        String pluginPath = ZkPathConstants.buildPluginPath(pluginName);
-        //如果zk中没有对应路径，则创建一个zk持久节点。
-        if (!zkClient.exists(pluginPath)) {
-            zkClient.createPersistent(pluginPath, true);
+            log.warn("Stop http long polling.");
         }
-        //最终会调用pluginDataSubscriber.onSubscribe(pluginPath)，作为缓存
-        cachePluginData(zkClient.readData(pluginPath));
-        //调用zk客户端接口，监听zk中pluginPath节点的数据变化。
-        subscribePluginDataChanges(pluginPath, pluginName);
     }
-    
-    /*
-    watcherSelector
-    watcherRule都是类似的，略。
-    
-    */
-    ......
 }
 ```
 
-接下来就有一个问题，`ZookeeperSyncDataService`实例化时我们看到需要给构造方法传入`PluginDataSubscriber`等订阅者，我们知道`Spring`在识别到这个参数声明时，会将对应类型的对象注入进来，但这几个订阅者何时实例化这种细节留待后续分析。
-
-#### soul-boostrap整体流程
-
-综合上述分析，结合`soul-bootstrap`项目整体结构，可以看到是`soul-bootstrap`模块集成了`soul-spring-boot-starter-sync-data-zookeeper`模块，该模块又集成了`soul-sync-data-zookeeper`，即整体依赖关系：
-
-```
-soul-bootstrap
-	|_ soul-spring-boot-starter-sync-data-zookeeper
-		|_ soul-sync-data-zookeeper
-```
-
-而`soul-sync-data-zookeeper`会利用`@Configuration`初始化`zookeeper`同步相关的对象，这个逻辑在`ZookeeperSyncDataConfiguration`中。而`ZookeeperSyncDataConfiguration`会利用配置文件中的属性判断是否要初始化相关对象，如果已配置了`zookeeper`同步相关的属性，就会创建`zookeeper`客户端，监听`zookeeper`相关节点，监听主要利用`zookeeper`的watch机制。
-
-涉及到的相关类：
-
-```mermaid
-graph LR
-ZookeeperSyncDataConfiguration --> ZookeeperSyncDataService --> ZkClient & PluginDataSubscriber & MetaDataSubscriber & AuthDataSubscriber
-```
-
-在`zookeeper`中数据的结构可以参考`soul`官网 https://dromara.org/zh/projects/soul/data-sync/ ，示意图（引自官网）如下：
-
-![](images/soul-zookeeper.png)
-
-
-
-
-
-```mermaid
-graph TB
-subgraph init
-    DataSyncConfiguration --> ZookeeperListener -->|Spring Import| ZookeeperConfiguration --> ZookeeperDataInit & ZookeeperDataChangedListener
-end
-subgraph update
-XxxxController --> XxxxService --> |DataChangeEvent|DataChangedEventDispatcher -->|updated data|ZookeeperDataChangedListener
-end
-```
+此处逻辑比较简单，`HttpSyncDataService`会创建一个线程池，启动线程去不断轮询`soul-admin`，拉取数据后进行更新本地缓存操作。此处比较简单，偷懒一下、就不进一步分析了，有兴趣的童鞋可以进一步探索下。
 
 ## 总结
 
-主要介绍了`soul`利用`zookeeper`同步数据的原理，包括：
+主要介绍了`soul`利用`HTTP`长轮询同步数据的原理，包括：
 
-- soul-bootstrap初始化zk客户端，监听zk, 如何更新
-- soul-admin初始化客户端，数据同步到zk的实现流程
+- soul-admin如何处理长轮询（很精巧的设计，建议自己体会）
+- soul-bootstrap如何处理长轮询
+  - 较为简略，有兴趣可以自己探索下。
 
 ## 参考资料
 
